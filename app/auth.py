@@ -12,27 +12,63 @@ import structlog
 from fastapi import APIRouter, Query, Request
 from fastapi.responses import RedirectResponse
 
-from app.config import REQUIRED_SCOPES, get_app_base_url, get_client_id, get_client_secret
+from app.config import (
+    REQUIRED_SCOPES,
+    get_all_app_credentials,
+    get_app_base_url,
+    get_client_id,
+    get_client_secret,
+)
 from app.shopify.tokens import store_token
 
 log = structlog.get_logger(__name__)
 
 router = APIRouter(tags=["auth"])
 
-# In-memory nonce store for OAuth CSRF protection {nonce: shop}
-_nonces: dict[str, str] = {}
+# In-memory nonce store for OAuth CSRF protection {nonce: (shop, client_id)}
+_nonces: dict[str, tuple[str, str]] = {}
+
+
+def _get_client_id_for_shop(shop: str) -> str:
+    """Get the correct Shopify app client ID for a shop.
+
+    Multiple Shopify apps may be used (e.g. one per group of stores).
+    Falls back to the primary client ID for unknown shops.
+    """
+    import os
+
+    # Check for explicit shop→client_id mapping in env
+    # Format: SHOPIFY_SHOP_CLIENT_ID_<sanitized_domain>=<client_id>
+    # Or use a simpler mapping approach
+    mapping_str = os.environ.get("SHOPIFY_SHOP_CLIENT_MAP", "")
+    if mapping_str:
+        for pair in mapping_str.split(","):
+            if "=" in pair:
+                domain, cid = pair.strip().split("=", 1)
+                if domain.strip() == shop:
+                    return cid.strip()
+
+    return get_client_id()
+
+
+def _get_secret_for_client(client_id: str) -> str:
+    """Get the secret matching a client ID."""
+    for cid, secret in get_all_app_credentials():
+        if cid == client_id:
+            return secret
+    return get_client_secret()
 
 
 @router.get("/auth/install")
 async def install(shop: str = Query(description="myshopify.com domain")) -> RedirectResponse:
     """Step 1: Redirect merchant to Shopify authorization page."""
-    client_id = get_client_id()
+    client_id = _get_client_id_for_shop(shop)
     if not client_id:
         log.error("oauth_missing_client_id")
         return RedirectResponse(url="/auth/error?msg=App+not+configured")
 
     nonce = secrets.token_urlsafe(32)
-    _nonces[nonce] = shop
+    _nonces[nonce] = (shop, client_id)
 
     redirect_uri = f"{get_app_base_url()}/auth/callback"
     params = urlencode(
@@ -58,12 +94,18 @@ async def callback(
     state: str = Query(description="Nonce for CSRF"),
 ) -> RedirectResponse:
     """Step 2: Exchange authorization code for permanent access token."""
-    expected_shop = _nonces.pop(state, None)
-    if expected_shop != shop:
-        log.warning("oauth_invalid_nonce", shop=shop)
+    nonce_data = _nonces.pop(state, None)
+    if not nonce_data:
+        log.warning("oauth_invalid_nonce", shop=shop, state=state)
         return RedirectResponse(url="/auth/error?msg=Invalid+state")
 
-    if not verify_query_hmac(str(request.query_params), get_client_secret()):
+    expected_shop, used_client_id = nonce_data
+    if expected_shop != shop:
+        log.warning("oauth_shop_mismatch", shop=shop, expected=expected_shop)
+        return RedirectResponse(url="/auth/error?msg=Invalid+state")
+
+    used_secret = _get_secret_for_client(used_client_id)
+    if not verify_query_hmac(str(request.query_params), used_secret):
         log.warning("oauth_invalid_hmac", shop=shop)
         return RedirectResponse(url="/auth/error?msg=Invalid+signature")
 
@@ -72,8 +114,8 @@ async def callback(
             resp = await client.post(
                 f"https://{shop}/admin/oauth/access_token",
                 json={
-                    "client_id": get_client_id(),
-                    "client_secret": get_client_secret(),
+                    "client_id": used_client_id,
+                    "client_secret": used_secret,
                     "code": code,
                 },
             )
