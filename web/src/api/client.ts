@@ -3,11 +3,26 @@
  * Uses Shopify App Bridge session tokens for authentication.
  */
 
-let sessionTokenGetter: (() => Promise<string>) | null = null;
+declare global {
+  interface Window {
+    shopify?: {
+      idToken: () => Promise<string>;
+      config?: Record<string, unknown>;
+    };
+  }
+}
 
-/** Set the session token getter (called from App.tsx after App Bridge init). */
-export function setSessionTokenGetter(getter: () => Promise<string>): void {
-  sessionTokenGetter = getter;
+/** Get a fresh session token from Shopify App Bridge. */
+async function getSessionToken(): Promise<string> {
+  // Try App Bridge first (embedded mode)
+  if (window.shopify?.idToken) {
+    return window.shopify.idToken();
+  }
+
+  // Fallback: cached token from sessionStorage (full-page mode)
+  const shop = sessionStorage.getItem("cod_shop") || "default";
+  const key = `cod_admin_token_${shop}`;
+  return sessionStorage.getItem(key) || "";
 }
 
 /** Fetch wrapper that adds session token to all requests. */
@@ -20,8 +35,8 @@ export async function apiFetch<T>(
     ...(options.headers as Record<string, string>),
   };
 
-  if (sessionTokenGetter) {
-    const token = await sessionTokenGetter();
+  const token = await getSessionToken();
+  if (token) {
     headers["Authorization"] = `Bearer ${token}`;
   }
 
@@ -38,11 +53,11 @@ export async function apiFetch<T>(
   return res.json() as Promise<T>;
 }
 
-/** Download a file (CSV export). Opens in new tab or triggers download. */
+/** Download a file (CSV export). */
 export async function apiDownload(path: string): Promise<void> {
+  const token = await getSessionToken();
   const headers: Record<string, string> = {};
-  if (sessionTokenGetter) {
-    const token = await sessionTokenGetter();
+  if (token) {
     headers["Authorization"] = `Bearer ${token}`;
   }
   const res = await fetch(`/api/admin${path}`, { headers });
@@ -56,4 +71,9 @@ export async function apiDownload(path: string): Promise<void> {
     "export.csv";
   a.click();
   URL.revokeObjectURL(url);
+}
+
+// Legacy export for backwards compatibility (no longer used by App.tsx)
+export function setSessionTokenGetter(_getter: () => Promise<string>): void {
+  // No-op — App Bridge handles tokens now
 }
