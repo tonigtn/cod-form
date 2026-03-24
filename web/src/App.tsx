@@ -35,11 +35,20 @@ function tokenKey(): string {
   return `cod_admin_token_${getShop()}`;
 }
 
-/** Exchange Shopify HMAC query params for an admin JWT. */
-async function exchangeHmacForToken(): Promise<void> {
+/** Initialize auth — try id_token (App Bridge), then HMAC exchange, then cached token. */
+async function initAuth(): Promise<void> {
   const key = tokenKey();
+  const params = new URLSearchParams(window.location.search);
 
-  // Check sessionStorage first (per-shop isolation)
+  // 1. Try Shopify App Bridge id_token (embedded mode)
+  const idToken = params.get("id_token");
+  if (idToken) {
+    sessionStorage.setItem(key, idToken);
+    setSessionTokenGetter(() => Promise.resolve(idToken));
+    return;
+  }
+
+  // 2. Check sessionStorage for a valid cached token
   const stored = sessionStorage.getItem(key);
   if (stored) {
     try {
@@ -53,7 +62,7 @@ async function exchangeHmacForToken(): Promise<void> {
     }
   }
 
-  // Clear any tokens from other shops (privacy isolation)
+  // 3. Clear tokens from other shops (privacy isolation)
   for (let i = sessionStorage.length - 1; i >= 0; i--) {
     const k = sessionStorage.key(i);
     if (k && k.startsWith("cod_admin_token_") && k !== key) {
@@ -61,8 +70,7 @@ async function exchangeHmacForToken(): Promise<void> {
     }
   }
 
-  // Exchange HMAC query params for JWT
-  const params = new URLSearchParams(window.location.search);
+  // 4. Fallback: exchange HMAC query params for JWT (full-page mode)
   if (!params.get("hmac")) return;
 
   const body: Record<string, string> = {};
@@ -135,7 +143,7 @@ export default function App() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    exchangeHmacForToken()
+    initAuth()
       .catch((e: unknown) => setError(String(e)))
       .finally(() => setReady(true));
   }, []);
