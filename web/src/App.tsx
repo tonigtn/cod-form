@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Component, useEffect, useState, type ErrorInfo, type ReactNode } from "react";
 import { AppProvider, Frame, Navigation } from "@shopify/polaris";
 import enTranslations from "@shopify/polaris/locales/en.json";
 import "@shopify/polaris/build/esm/styles.css";
@@ -125,17 +125,34 @@ function AppContent() {
         </Navigation>
       }
     >
-      <StoreProvider>
-        <Routes>
-          <Route index element={<Dashboard />} />
-          <Route path="config" element={<Config />} />
-          <Route path="orders" element={<Orders />} />
-          <Route path="blacklists" element={<Blacklists />} />
-          <Route path="settings" element={<Settings />} />
-        </Routes>
-      </StoreProvider>
+      <ErrorBoundary>
+        <StoreProvider>
+          <Routes>
+            <Route index element={<Dashboard />} />
+            <Route path="config" element={<Config />} />
+            <Route path="orders" element={<Orders />} />
+            <Route path="blacklists" element={<Blacklists />} />
+            <Route path="settings" element={<Settings />} />
+          </Routes>
+        </StoreProvider>
+      </ErrorBoundary>
     </Frame>
   );
+}
+
+class ErrorBoundary extends Component<{children: ReactNode}, {error: string}> {
+  state = { error: "" };
+  static getDerivedStateFromError(error: Error) { return { error: error.message }; }
+  componentDidCatch(error: Error, info: ErrorInfo) { console.error("ErrorBoundary:", error, info); }
+  render() {
+    if (this.state.error) return (
+      <div style={{padding: 40, color: "red"}}>
+        <h2>Render Error</h2>
+        <pre style={{whiteSpace: "pre-wrap"}}>{this.state.error}</pre>
+      </div>
+    );
+    return this.props.children;
+  }
 }
 
 export default function App() {
