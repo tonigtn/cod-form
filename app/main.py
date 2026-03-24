@@ -97,28 +97,32 @@ if _WEB_DIST.is_dir():
 
     _INDEX_HTML = (_WEB_DIST / "index.html").read_text()
 
+    def _dynamic_index(shop: str) -> Response:
+        """Serve index.html with the correct shopify-api-key for this shop."""
+        from app.auth import _get_client_id_for_shop
+
+        client_id = _get_client_id_for_shop(shop)
+        html = _INDEX_HTML.replace("__SHOPIFY_API_KEY__", client_id)
+        return Response(
+            content=html,
+            media_type="text/html",
+            headers={"Cache-Control": "no-cache, no-store, must-revalidate"},
+        )
+
     @app.get("/admin/{path:path}")
     async def admin_spa(path: str, request: Request) -> Response:
         """Serve admin SPA — returns index.html for all non-file routes."""
         file_path = _WEB_DIST / path
         if file_path.is_file() and ".." not in path:
             return FileResponse(str(file_path))
-        # Inject the correct shopify-api-key from query params
-        request.query_params.get("shop", "")
-        return Response(
-            content=_INDEX_HTML,
-            media_type="text/html",
-            headers={"Cache-Control": "no-cache, no-store, must-revalidate"},
-        )
+        shop = request.query_params.get("shop", "")
+        return _dynamic_index(shop)
 
     @app.get("/admin")
     async def admin_root(request: Request) -> Response:
         """Serve admin SPA root."""
-        return Response(
-            content=_INDEX_HTML,
-            media_type="text/html",
-            headers={"Cache-Control": "no-cache, no-store, must-revalidate"},
-        )
+        shop = request.query_params.get("shop", "")
+        return _dynamic_index(shop)
 
 
 # ── Error handling ─────────────────────────────────────────────────────────
