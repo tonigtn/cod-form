@@ -69,11 +69,14 @@ async def create_cod_order(req: CodOrderRequest, shop_id: int) -> CodOrderRespon
 
     config = await load_store_config(shop_id)
 
-    # Normalize phone to E.164
+    # Normalize phone to E.164 based on shop country
     phone = req.phone.replace(" ", "").replace("-", "")
-    country = config.shipping.province_rates.get("_country_code", "RO")
+    from app.shopify.tokens import get_shop_info
+
+    shop_info = await get_shop_info(req.shop)
+    country = shop_info.get("country_code", "RO") if shop_info else "RO"
     if country == "GR":
-        if phone.startswith("69"):
+        if phone.startswith("69") or phone.startswith("2"):
             phone = "+30" + phone
     elif phone.startswith("0"):
         phone = "+4" + phone
@@ -157,12 +160,12 @@ async def create_cod_order(req: CodOrderRequest, shop_id: int) -> CodOrderRespon
             "address1": req.address1,
             "city": req.city,
             "province": req.province,
-            "country": "Romania",
-            "countryCode": "RO",
-            "zip": req.zip or "000000",
+            "country": "Greece" if country == "GR" else "Romania",
+            "countryCode": country,
+            "zip": req.zip or ("00000" if country == "GR" else "000000"),
         },
         "shippingLine": {
-            "title": "Curier",
+            "title": "Courier" if country == "GR" else "Curier",
             "price": req.shipping_price,
         },
         "note": req.note or config.form.custom_note_prefix,
