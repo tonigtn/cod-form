@@ -43,9 +43,62 @@
   var orderPlaced = false;
   var formCloseCount = 0;
 
+  /* ── Locale labels (populated from form-config, Romanian defaults) ── */
+  var L = {
+    cod_fee: 'Taxă ramburs',
+    quantity_unit: 'buc',
+    regular_price: 'Preț întreg',
+    free_shipping: 'Transport gratuit',
+    variant_label: 'Varianta',
+    required_field: 'Câmp obligatoriu',
+    connection_error: 'Eroare de conexiune. Încearcă din nou.',
+    order_prefix: 'Comanda',
+    retry: 'Încearcă din nou',
+    otp_title: 'Verificare telefon',
+    otp_desc: 'Am trimis un cod de verificare pe WhatsApp.',
+    otp_verify: 'Verifică codul',
+    otp_resend: 'Retrimite',
+    otp_verifying: 'Se verifică...',
+    otp_sending: 'Se trimite...',
+    otp_resent: 'Cod retrimis!',
+    otp_error: 'Nu am putut trimite codul de verificare.',
+    online_payment: '💳 Plată cu cardul',
+    bumps_heading: 'Adaugă la comandă',
+    discount_prefix: 'Cod',
+    discount_invalid: 'Cod invalid',
+    discount_check_error: 'Eroare la verificare',
+    upsell_loading: 'Se încarcă...',
+    upsell_creating: 'Se creează comanda...',
+    upsell_offer_prefix: 'Ai văzut și',
+    upsell_available_only: 'Ofertă disponibilă doar',
+    upsell_gift_discount: 'Reducere Cadou Pentru Tine',
+    upsell_added: '✓ Adăugat',
+    upsell_no_thanks: 'Nu, mulțumesc, finalizați comanda',
+    success_title: 'Comanda a fost plasată cu succes!',
+    success_text: 'Te vom contacta în curând.',
+    close: 'Închide',
+    processing: 'Se procesează...',
+    submit: 'Plasează comanda',
+    submit_subtitle: 'PLATA LA LIVRARE',
+    subtotal: 'Subtotal',
+    shipping: 'Transport',
+    discount: 'Reducere',
+    total: 'Total',
+    select_placeholder: 'Selectează...',
+    apply: 'Aplică',
+    enter_code: 'Introdu codul',
+    have_discount: 'Ai un cod de reducere?',
+    downsell_apply: 'Aplică reducerea',
+    sticky_cta: 'Comandă acum',
+    sticky_cta_long: 'Comandă acum — Plata la livrare',
+    accept_offer: 'Acceptă Oferta',
+    reject_offer: 'Nu, mulțumesc',
+    phone_error: 'Format: 07XX XXX XXX (10 cifre)',
+  };
+
   /* ── COD fee state ── */
   var codFee = 0;
-  var codFeeLabel = (STORE_ID === 'store_4') ? 'Χρέωση αντικαταβολής' : 'Taxă ramburs';
+  var codFeeLabel = L.cod_fee;
 
   /* ── Shipping rates state ── */
   var shippingRates = [];
@@ -415,7 +468,7 @@
           html += '<img src="' + o.image_url + '" alt="" style="width:60px;height:60px;border-radius:6px;object-fit:cover;margin-bottom:4px">';
         }
         html += '<div class="cod-page-offer__qty" style="color:' + titleColor + ';font-size:' + titleSize + ';font-weight:' + titleBold + ';font-style:' + titleItalic + '">' + offerTitle(o) + '</div>';
-        html += '<div class="cod-page-offer__price" style="color:' + priceColor + ';font-size:' + priceSize + ';font-weight:' + priceBold + ';font-style:' + priceItalic + '">' + formatMoney(perUnit) + (o.min_qty > 1 ? ((STORE_ID === 'store_4') ? '/τεμ' : '/buc') : '') + '</div>';
+        html += '<div class="cod-page-offer__price" style="color:' + priceColor + ';font-size:' + priceSize + ';font-weight:' + priceBold + ';font-style:' + priceItalic + '">' + formatMoney(perUnit) + (o.min_qty > 1 ? (('/' + L.quantity_unit)) : '') + '</div>';
         if (o.min_qty === 1 && !offerHasDiscount(o)) {
           html += '<div class="cod-page-offer__tag">' + ((STORE_ID === 'store_4') ? '\u039a\u03b1\u03bd\u03bf\u03bd\u03b9\u03ba\u03ae \u03c4\u03b9\u03bc\u03ae' : 'Pre\u021b \u00eentreg') + '</div>';
         } else if (o.min_qty > 1) {
@@ -535,7 +588,7 @@
         html += '<div class="cod-form-offers__fulltag">' + ((STORE_ID === 'store_4') ? '\u039a\u03b1\u03bd\u03bf\u03bd\u03b9\u03ba\u03ae \u03c4\u03b9\u03bc\u03ae' : 'Pre\u021b \u00eentreg') + '</div>';
       }
 
-      html += '<div class="cod-form-offers__price">' + formatMoney(pu) + (o.min_qty > 1 ? ((STORE_ID === 'store_4') ? '/\u03c4\u03b5\u03bc' : '/buc') : '') + '</div>';
+      html += '<div class="cod-form-offers__price">' + formatMoney(pu) + (o.min_qty > 1 ? (('/' + L.quantity_unit)) : '') + '</div>';
 
       if (o.min_qty > 1) {
         var tot = pu * o.min_qty;
@@ -549,7 +602,7 @@
 
     if (productVariants.length > 1) {
       html += '<div class="cod-form-offers__variants">';
-      html += '<div class="cod-form-offers__var-label">' + (variantOptionName || ((STORE_ID === 'store_4') ? '\u03a0\u03b1\u03c1\u03b1\u03bb\u03bb\u03b1\u03b3\u03ae' : 'Varianta')) + '</div>';
+      html += '<div class="cod-form-offers__var-label">' + (variantOptionName || L.variant_label) + '</div>';
       for (var v = 0; v < quantity; v++) {
         var sv = selectedVariants[v] || currentVariantId;
         html += '<div class="cod-form-offers__var-row">';
@@ -657,7 +710,7 @@ function renderBumps() {
         + '</span>'
         + '</label>';
     }
-    container.innerHTML = '<div class="cod-form__bump-heading">' + ((STORE_ID === 'store_4') ? '⬇️ Προσφορές ⬇️' : 'Adaugă la comandă:') + '</div>' + html;
+    container.innerHTML = '<div class="cod-form__bump-heading">' + L.bumps_heading + '</div>' + html;
     trackEvent('bump_impression');
   }
 
@@ -715,7 +768,7 @@ function renderBumps() {
         + '<input type="radio" name="shipping_rate" value="' + price.toFixed(2) + '"' + checked + '>'
         + '<span>' + r.name + '</span>'
         + '<span class="cod-form__shipping-rate-price">'
-        + (price === 0 ? ((STORE_ID === 'store_4') ? 'Δωρεάν' : 'Gratuit') : formatMoney(price))
+        + (price === 0 ? L.free_shipping : formatMoney(price))
         + '</span></label>';
     }
     container.innerHTML = html;
@@ -826,14 +879,14 @@ function renderBumps() {
     popup.innerHTML = '<div class="cod-otp">'
       + '<button type="button" class="cod-otp__close" id="cod-otp-close">&times;</button>'
       + '<div class="cod-otp__icon">🔐</div>'
-      + '<h3 class="cod-otp__title">' + ((STORE_ID === 'store_4') ? 'Επαλήθευση τηλεφώνου' : 'Verificare telefon') + '</h3>'
+      + '<h3 class="cod-otp__title">' + L.otp_title + '</h3>'
       + '<p class="cod-otp__desc">' + ((STORE_ID === 'store_4') ? 'Στείλαμε κωδικό επαλήθευσης στο WhatsApp στον αριθμό ' : 'Am trimis un cod de verificare pe WhatsApp la numărul ') + phone.slice(0, 4) + '***' + phone.slice(-3) + '</p>'
       + '<div class="cod-otp__input-row">'
       + '<input type="text" id="cod-otp-input" class="cod-otp__input" maxlength="6" placeholder="______" autocomplete="one-time-code" inputmode="numeric" />'
       + '</div>'
       + '<p class="cod-otp__error" id="cod-otp-error" hidden></p>'
-      + '<button type="button" class="cod-otp__verify-btn" id="cod-otp-verify">' + ((STORE_ID === 'store_4') ? 'Επαλήθευση κωδικού' : 'Verifică codul') + '</button>'
-      + '<p class="cod-otp__resend">' + ((STORE_ID === 'store_4') ? 'Δεν έλαβες τον κωδικό; ' : 'Nu ai primit codul? ') + '<a href="#" id="cod-otp-resend">' + ((STORE_ID === 'store_4') ? 'Επαναποστολή' : 'Retrimite') + '</a></p>'
+      + '<button type="button" class="cod-otp__verify-btn" id="cod-otp-verify">' + L.otp_verify + '</button>'
+      + '<p class="cod-otp__resend">' + ((STORE_ID === 'store_4') ? 'Δεν έλαβες τον κωδικό; ' : 'Nu ai primit codul? ') + '<a href="#" id="cod-otp-resend">' + L.otp_resend + '</a></p>'
       + '</div>';
     document.body.appendChild(popup);
 
@@ -853,7 +906,7 @@ function renderBumps() {
         if (code.length < 4) return;
 
         target.disabled = true;
-        target.textContent = (STORE_ID === 'store_4') ? 'Επαλήθευση...' : 'Se verifică...';
+        target.textContent = L.otp_verifying;
         var errEl = document.getElementById('cod-otp-error');
 
         verifyOtp(phone, code, function (verified, error) {
@@ -872,7 +925,7 @@ function renderBumps() {
       if (target.id === 'cod-otp-resend') {
         e.preventDefault();
         var resendLink = target;
-        resendLink.textContent = (STORE_ID === 'store_4') ? 'Αποστολή...' : 'Se trimite...';
+        resendLink.textContent = L.otp_sending;
         sendOtp(phone, function (sent, error) {
           resendLink.textContent = sent ? ((STORE_ID === 'store_4') ? 'Ο κωδικός στάλθηκε ξανά!' : 'Cod retrimis!') : (error || ((STORE_ID === 'store_4') ? 'Σφάλμα' : 'Eroare'));
           setTimeout(function () { resendLink.textContent = (STORE_ID === 'store_4') ? 'Επαναποστολή' : 'Retrimite'; }, 3000);
@@ -966,6 +1019,15 @@ function renderBumps() {
       .then(function (r) { return r.json(); })
       .then(function (cfg) {
         formConfig = cfg;
+        // Populate locale labels from form-config response
+        if (cfg.locale && cfg.locale.labels) {
+          var labels = cfg.locale.labels;
+          for (var key in labels) {
+            if (labels.hasOwnProperty(key) && labels[key]) L[key] = labels[key];
+          }
+          codFeeLabel = L.cod_fee;
+          CURRENCY = cfg.locale.currency || CURRENCY;
+        }
         // Product restriction check — hide form if product excluded
         if (cfg.settings && checkProductRestriction(cfg.settings) === false) return;
         applyFormConfig(cfg);
@@ -1007,7 +1069,7 @@ function renderBumps() {
     // Load Google Places JS
     var s = document.createElement('script');
     s.src = 'https://maps.googleapis.com/maps/api/js?key=' + encodeURIComponent(cfg.settings.google_places_api_key)
-      + '&libraries=places&language=' + ((STORE_ID === 'store_4') ? 'el' : 'ro') + '&callback=__codPlacesReady';
+      + '&libraries=places&language=' + (L.language || 'ro') + '&callback=__codPlacesReady';
     s.async = true;
     s.defer = true;
     window.__codPlacesReady = function () {
@@ -1017,7 +1079,7 @@ function renderBumps() {
       if (!addrInput || !window.google || !window.google.maps) return;
       var autocomplete = new window.google.maps.places.Autocomplete(addrInput, {
         types: ['address'],
-        componentRestrictions: { country: (STORE_ID === 'store_4') ? 'gr' : 'ro' },
+        componentRestrictions: { country: (formConfig && formConfig.locale && formConfig.locale.country_code || 'RO').toLowerCase() },
         fields: ['address_components']
       });
       autocomplete.addListener('place_changed', function () {
@@ -1752,14 +1814,14 @@ function renderBumps() {
       if (rowWrapper && rowWrapper.hidden) continue;
       if (!input.value.trim()) {
         var fname = input.getAttribute('name') || '';
-        var reqErr = (STORE_ID === 'store_4') ? '\u03a5\u03c0\u03bf\u03c7\u03c1\u03b5\u03c9\u03c4\u03b9\u03ba\u03cc \u03c0\u03b5\u03b4\u03af\u03bf' : 'C\u00e2mp obligatoriu';
+        var reqErr = L.required_field;
         showFieldError(fname, reqErr);
         valid = false;
       }
     }
     var phoneVal = (form.querySelector('[name="phone"]').value || '').replace(/[\s-]/g, '');
     var phonePattern = (STORE_ID === 'store_4') ? /^69\d{8}$/ : /^0\d{9}$/;
-    var phoneError = (STORE_ID === 'store_4') ? '\u03a3\u03c5\u03bc\u03c0\u03bb\u03ae\u03c1\u03c9\u03c3\u03b5: 69X XXXX XXXX (10 \u03c8\u03b7\u03c6\u03af\u03b1)' : 'Format: 07XX XXX XXX (10 cifre)';
+    var phoneError = L.phone_error;
     if (phoneVal && !phoneVal.match(phonePattern)) {
       showFieldError('phone', phoneError);
       valid = false;
