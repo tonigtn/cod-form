@@ -104,11 +104,11 @@ function AppContent() {
   const location = useLocation();
 
   const navItems = [
-    { url: "/admin/", label: "Dashboard", icon: HomeIcon },
-    { url: "/admin/config", label: "Config", icon: SettingsIcon },
-    { url: "/admin/orders", label: "Orders", icon: OrderIcon },
-    { url: "/admin/blacklists", label: "Blacklists", icon: ShieldCheckMarkIcon },
-    { url: "/admin/settings", label: "Settings", icon: AdjustIcon },
+    { url: "/", label: "Dashboard", icon: HomeIcon },
+    { url: "/config", label: "Config", icon: SettingsIcon },
+    { url: "/orders", label: "Orders", icon: OrderIcon },
+    { url: "/blacklists", label: "Blacklists", icon: ShieldCheckMarkIcon },
+    { url: "/settings", label: "Settings", icon: AdjustIcon },
   ];
 
   return (
@@ -162,7 +162,7 @@ export default function App() {
   return (
     <AppProvider i18n={enTranslations}>
       <QueryClientProvider client={queryClient}>
-        <BrowserRouter basename="/admin">
+        <BrowserRouter>
           <AppContent />
         </BrowserRouter>
       </QueryClientProvider>

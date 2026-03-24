@@ -93,7 +93,7 @@ app.add_middleware(
 if _WEB_DIST.is_dir():
     _assets_dir = _WEB_DIST / "assets"
     if _assets_dir.is_dir():
-        app.mount("/admin/assets", StaticFiles(directory=str(_assets_dir)), name="admin-assets")
+        app.mount("/assets", StaticFiles(directory=str(_assets_dir)), name="spa-assets")
 
     _INDEX_HTML = (_WEB_DIST / "index.html").read_text()
 
@@ -109,20 +109,25 @@ if _WEB_DIST.is_dir():
             headers={"Cache-Control": "no-cache, no-store, must-revalidate"},
         )
 
-    @app.get("/admin/{path:path}")
-    async def admin_spa(path: str, request: Request) -> Response:
-        """Serve admin SPA — returns index.html for all non-file routes."""
+    # Serve SPA for all known frontend routes (App Bridge navigates to root paths)
+    _SPA_ROUTES = {"", "admin", "config", "orders", "blacklists", "settings", "dashboard"}
+
+    @app.get("/{path:path}")
+    async def spa_catch_all(path: str, request: Request) -> Response:
+        """Serve admin SPA for all non-API routes."""
+        # Skip API routes
+        if path.startswith("api/") or path.startswith("auth/") or path.startswith("proxy/"):
+            return JSONResponse({"detail": "Not Found"}, status_code=404)
+        # Serve static files from dist
         file_path = _WEB_DIST / path
         if file_path.is_file() and ".." not in path:
             return FileResponse(str(file_path))
-        shop = request.query_params.get("shop", "")
-        return _dynamic_index(shop)
-
-    @app.get("/admin")
-    async def admin_root(request: Request) -> Response:
-        """Serve admin SPA root."""
-        shop = request.query_params.get("shop", "")
-        return _dynamic_index(shop)
+        # Serve SPA index for known routes
+        base = path.split("/")[0] if path else ""
+        if base in _SPA_ROUTES or path.startswith("admin"):
+            shop = request.query_params.get("shop", "")
+            return _dynamic_index(shop)
+        return JSONResponse({"detail": "Not Found"}, status_code=404)
 
 
 # ── Error handling ─────────────────────────────────────────────────────────
