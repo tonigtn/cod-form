@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="shopify-api-key" content="__SHOPIFY_API_KEY__" />
+    <script>window.shopify={config:{disabledFeatures:["auto-redirect"]}};</script>
+    <title>COD Order Form Admin</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <ui-nav-menu>
+      <a href="/" rel="home">Dashboard</a>
+      <a href="/config">Config</a>
+      <a href="/orders">Orders</a>
+      <a href="/blacklists">Blacklists</a>
+    </ui-nav-menu>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

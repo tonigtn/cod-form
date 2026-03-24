@@ -9,3 +9,7 @@ node_modules/
 web/dist/
 *.egg-info/
 .venv/
+web/node_modules/
+web/dist/
+web/package-lock.json
+web/tsconfig.tsbuildinfo
