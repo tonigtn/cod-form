@@ -1262,6 +1262,9 @@ function renderBumps() {
       }
       html += '</span>';
       triggerBtn.innerHTML = html;
+      // Ensure horizontal layout: icon left, text center
+      triggerBtn.style.flexDirection = 'row';
+      triggerBtn.style.gap = '10px';
     }
 
     // Apply form style via CSS variables on overlay
