@@ -25,33 +25,10 @@ async def main() -> None:
     await conn.close()
 
     h = {"X-Shopify-Access-Token": token, "Content-Type": "application/json"}
+    actual_block_type = COD_BLOCK_TYPE
+    actual_block_settings = {}
 
     async with httpx.AsyncClient(timeout=30) as c:
-        # First, find the correct block type from genunchere template
-        gen_key = "templates/product.prietenbebe-genunchere-bebelusilor-3-pack.json"
-        r = await c.get(
-            f"https://{SHOP}/admin/api/2025-01/themes/{THEME}/assets.json",
-            params={"asset[key]": gen_key},
-            headers=h,
-        )
-        gen_tpl = json.loads(r.json()["asset"]["value"])
-
-        # Find the COD form block type from genunchere's main section
-        actual_block_type = None
-        actual_block_settings = {}
-        main_section = gen_tpl.get("sections", {}).get("main", {})
-        for bk, bv in main_section.get("blocks", {}).items():
-            btype = bv.get("type", "")
-            if "cod-form" in btype.lower():
-                actual_block_type = btype
-                actual_block_settings = bv.get("settings", {})
-                print(f"Found COD block type: {btype}")
-                print(f"Block key: {bk}")
-                break
-
-        if not actual_block_type:
-            print("ERROR: No COD form block found in genunchere template!")
-            return
 
         # Get all product templates
         r = await c.get(
