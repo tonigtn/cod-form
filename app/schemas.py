@@ -2,13 +2,17 @@
 
 from __future__ import annotations
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class CodOrderRequest(BaseModel, frozen=True):
+    model_config = ConfigDict(populate_by_name=True)
     """Incoming COD order from the storefront form."""
 
     shop: str = Field(default="", description="myshopify.com domain")
+    store_id_legacy: str | None = Field(
+        default=None, alias="store_id", description="Legacy store_id"
+    )
     variant_id: int = Field(description="Shopify variant GID numeric ID")
     quantity: int = Field(default=1, ge=1, le=10)
     first_name: str = Field(min_length=1, max_length=100)
@@ -97,9 +101,11 @@ class QuantityOffersResponse(BaseModel, frozen=True):
 
 
 class DiscountValidationRequest(BaseModel, frozen=True):
+    model_config = ConfigDict(populate_by_name=True)
     """Request to validate a Shopify discount code."""
 
-    shop: str
+    shop: str = ""
+    store_id_legacy: str | None = Field(default=None, alias="store_id")
     code: str = Field(min_length=1, max_length=50)
 
 
@@ -166,9 +172,11 @@ class UpsellsResponse(BaseModel, frozen=True):
 
 
 class UpsellAddRequest(BaseModel, frozen=True):
+    model_config = ConfigDict(populate_by_name=True)
     """Request to add an upsell variant to an existing order."""
 
-    shop: str
+    shop: str = ""
+    store_id_legacy: str | None = Field(default=None, alias="store_id")
     order_id: int
     variant_id: int
     quantity: int = Field(default=1, ge=1, le=5)
@@ -184,9 +192,11 @@ class UpsellAddResponse(BaseModel, frozen=True):
 
 
 class OtpSendRequest(BaseModel, frozen=True):
+    model_config = ConfigDict(populate_by_name=True)
     """Request to send an OTP code."""
 
-    shop: str
+    shop: str = ""
+    store_id_legacy: str | None = Field(default=None, alias="store_id")
     phone: str = Field(min_length=10, max_length=15)
 
 
@@ -198,9 +208,11 @@ class OtpSendResponse(BaseModel, frozen=True):
 
 
 class OtpVerifyRequest(BaseModel, frozen=True):
+    model_config = ConfigDict(populate_by_name=True)
     """Request to verify an OTP code."""
 
-    shop: str
+    shop: str = ""
+    store_id_legacy: str | None = Field(default=None, alias="store_id")
     phone: str = Field(min_length=10, max_length=15)
     code: str = Field(min_length=4, max_length=8)
 

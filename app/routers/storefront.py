@@ -52,6 +52,25 @@ def _is_rate_limited(ip: str) -> bool:
     return False
 
 
+# Backwards compatibility: legacy store_id → shop domain mapping
+# Existing themes send store_id=store_1, etc. Map to myshopify domains.
+_LEGACY_STORE_MAP: dict[str, str] = {
+    "store_1": "rmeai1-da.myshopify.com",
+    "store_2": "10qaxg-sc.myshopify.com",
+    "store_3": "wst6jx-73.myshopify.com",
+    "store_4": "jgj1ff-ak.myshopify.com",
+}
+
+
+def _resolve_shop_param(shop: str = "", store_id: str = "") -> str:
+    """Resolve shop domain from either shop or legacy store_id parameter."""
+    if shop:
+        return shop
+    if store_id:
+        return _LEGACY_STORE_MAP.get(store_id, store_id)
+    return ""
+
+
 async def _resolve_shop_id(shop: str) -> int | None:
     """Resolve shop domain to internal shop_id."""
     if not shop:
@@ -83,8 +102,10 @@ async def health() -> dict[str, str]:
 @router.get("/form-config")
 async def form_config_endpoint(
     shop: str = Query(default="", description="Shop domain"),
+    store_id: str = Query(default="", description="Legacy store identifier"),
 ) -> dict[str, Any]:
     """Return merged form config for storefront rendering."""
+    shop = _resolve_shop_param(shop, store_id)
     shop_id = await _resolve_shop_id(shop)
     if not shop_id:
         return {}
@@ -141,9 +162,11 @@ async def form_config_endpoint(
 @router.get("/offers")
 async def offers_endpoint(
     shop: str = Query(default="", description="Shop domain"),
+    store_id: str = Query(default="", description="Legacy store identifier"),
     product_id: int = Query(default=0, description="Product ID filter"),
 ) -> QuantityOffersResponse:
     """Return quantity offers for a shop."""
+    shop = _resolve_shop_param(shop, store_id)
     shop_id = await _resolve_shop_id(shop)
     if not shop_id:
         return QuantityOffersResponse()
@@ -157,11 +180,13 @@ async def offers_endpoint(
 @router.get("/shipping-rates")
 async def shipping_rates_endpoint(
     shop: str = Query(default="", description="Shop domain"),
+    store_id: str = Query(default="", description="Legacy store identifier"),
     order_total: float = Query(default=0),
     quantity: int = Query(default=1),
     product_id: int | None = Query(default=None),
 ) -> dict[str, Any]:
     """Return applicable shipping rates."""
+    shop = _resolve_shop_param(shop, store_id)
     shop_id = await _resolve_shop_id(shop)
     if not shop_id:
         return {"rates": []}
@@ -197,9 +222,11 @@ async def shipping_rates_endpoint(
 @router.get("/downsell")
 async def downsell_endpoint(
     shop: str = Query(default="", description="Shop domain"),
+    store_id: str = Query(default="", description="Legacy store identifier"),
     product_id: int | None = Query(default=None),
 ) -> dict[str, Any]:
     """Return downsell config."""
+    shop = _resolve_shop_param(shop, store_id)
     shop_id = await _resolve_shop_id(shop)
     if not shop_id:
         return {"enabled": False}
@@ -215,9 +242,11 @@ async def downsell_endpoint(
 @router.get("/bumps")
 async def bumps_endpoint(
     shop: str = Query(default="", description="Shop domain"),
+    store_id: str = Query(default="", description="Legacy store identifier"),
     product_id: int = Query(description="Current product ID"),
 ) -> OrderBumpsResponse:
     """Return order bumps for a product."""
+    shop = _resolve_shop_param(shop, store_id)
     shop_id = await _resolve_shop_id(shop)
     if not shop_id:
         return OrderBumpsResponse()
@@ -230,6 +259,9 @@ async def bumps_endpoint(
 @router.post("/validate-discount")
 async def validate_discount_endpoint(req: DiscountValidationRequest) -> DiscountValidationResponse:
     """Validate a Shopify discount code."""
+    shop = req.shop or _LEGACY_STORE_MAP.get(req.store_id_legacy or "", "")
+    if shop and shop != req.shop:
+        req = req.model_copy(update={"shop": shop})
     from app.shopify.discounts import validate_discount
 
     return await validate_discount(req)
@@ -243,6 +275,10 @@ async def create_order(req: CodOrderRequest, request: Request) -> CodOrderRespon
     if _is_rate_limited(client_ip):
         return CodOrderResponse(success=False, error="Prea multe cereri. Încearcă din nou.")
 
+    # Backwards compat: resolve legacy store_id from body
+    shop = req.shop or _LEGACY_STORE_MAP.get(req.store_id_legacy or "", "")
+    if shop and shop != req.shop:
+        req = req.model_copy(update={"shop": shop})
     shop_id = await _resolve_shop_id(req.shop)
     if not shop_id:
         return CodOrderResponse(success=False, error="Invalid store")
@@ -296,8 +332,10 @@ async def create_order(req: CodOrderRequest, request: Request) -> CodOrderRespon
 @router.get("/otp-status")
 async def otp_status_endpoint(
     shop: str = Query(default=""),
+    store_id: str = Query(default="", description="Legacy store identifier"),
 ) -> dict[str, bool]:
     """Check if OTP is enabled for a shop."""
+    shop = _resolve_shop_param(shop, store_id)
     shop_id = await _resolve_shop_id(shop)
     if not shop_id:
         return {"otp_enabled": False}
@@ -308,6 +346,9 @@ async def otp_status_endpoint(
 @router.post("/otp/send")
 async def otp_send_endpoint(req: OtpSendRequest, request: Request) -> OtpSendResponse:
     """Generate and send OTP code via WhatsApp."""
+    shop = req.shop or _LEGACY_STORE_MAP.get(req.store_id_legacy or "", "")
+    if shop and shop != req.shop:
+        req = req.model_copy(update={"shop": shop})
     shop_id = await _resolve_shop_id(req.shop)
     if not shop_id:
         return OtpSendResponse(sent=False, error="Invalid store")
@@ -362,7 +403,7 @@ async def track_event(request: Request) -> dict[str, bool]:
     except Exception:
         return {"ok": False}
 
-    shop = str(body.get("shop", ""))
+    shop = str(body.get("shop", "")) or _LEGACY_STORE_MAP.get(str(body.get("store_id", "")), "")
     event_type = str(body.get("event", ""))
     if not event_type or not shop:
         return {"ok": False}
@@ -396,7 +437,7 @@ async def form_partial_endpoint(request: Request) -> dict[str, bool]:
     except Exception:
         return {"ok": False}
 
-    shop = str(body.get("shop", ""))
+    shop = str(body.get("shop", "")) or _LEGACY_STORE_MAP.get(str(body.get("store_id", "")), "")
     phone = str(body.get("phone", "")).replace(" ", "").replace("-", "")
     if not shop or len(phone) < 10:
         return {"ok": False}
@@ -422,8 +463,10 @@ async def form_partial_endpoint(request: Request) -> dict[str, bool]:
 @router.get("/abandoned-stats")
 async def abandoned_stats_endpoint(
     shop: str = Query(default=""),
+    store_id: str = Query(default="", description="Legacy store identifier"),
 ) -> dict[str, int]:
     """Get abandoned form stats."""
+    shop = _resolve_shop_param(shop, store_id)
     shop_id = await _resolve_shop_id(shop)
     if not shop_id:
         return {"total": 0, "today": 0, "recovered": 0, "reminder_sent": 0}
@@ -436,9 +479,11 @@ async def abandoned_stats_endpoint(
 @router.get("/upsells")
 async def upsells_endpoint(
     shop: str = Query(default=""),
+    store_id: str = Query(default="", description="Legacy store identifier"),
     product_id: int = Query(description="Purchased product ID"),
 ) -> UpsellsResponse:
     """Return upsell products."""
+    shop = _resolve_shop_param(shop, store_id)
     shop_id = await _resolve_shop_id(shop)
     if not shop_id:
         return UpsellsResponse()
