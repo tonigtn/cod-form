@@ -1085,7 +1085,11 @@ function renderBumps() {
       triggerText.textContent = L.submit || labels.submit || triggerText.textContent;
     }
 
-    // Discount toggle
+    // Discount section — unhide if enabled in config
+    var discSection = $('cod-discount-section');
+    if (discSection && formConfig && formConfig.settings && formConfig.settings.enable_discount_codes) {
+      discSection.hidden = false;
+    }
     var discToggle = $('cod-discount-toggle');
     if (discToggle && labels.have_discount) discToggle.textContent = labels.have_discount;
     var discApply = $('cod-discount-apply');
