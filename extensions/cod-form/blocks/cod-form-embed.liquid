@@ -1,270 +1,175 @@
 {% comment %}
-  COD Order Form — popup overlay section.
-  Replaces Releasit/EasySell paid apps with a built-in form.
-  The trigger button (id="cod-form-open") lives in the product section for proper positioning.
-  This section provides: overlay popup + standalone CSS + JS + multi-pixel tracking.
-  Droppable into ANY Shopify theme — just add a trigger button with id="cod-form-open".
+  COD Order Form — Theme App Extension block.
+  Self-contained: loads config from API, renders button + popup form.
+  Works on ANY Shopify theme. Just add the block to a product page.
 {% endcomment %}
 
-{%- if settings.cod_enabled and product.available -%}
-  {%- comment -%} Load standalone CSS for cross-theme compatibility {%- endcomment -%}
-  {{ 'cod-form.css' | asset_url | stylesheet_tag }}
+{{ 'cod-form.css' | asset_url | stylesheet_tag }}
 
-  {%- comment -%} Popup overlay (hidden until trigger button with id="cod-form-open" is clicked) {%- endcomment -%}
-  <div class="cod-form-overlay" id="cod-form-overlay" role="dialog" aria-modal="true" aria-label="{{ 'sections.cod_form.trigger' | t }}" hidden>
+{% if product.available %}
+<div id="cod-form-wrapper">
+  {%- comment -%} Trigger button (styled by JS from API config) {%- endcomment -%}
+  <button type="button" class="cod-form-trigger" id="cod-form-open"
+    style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;min-height:56px;padding:14px 24px;font-size:16px;font-weight:600;color:#fff;background:#b5a1e0;border:none;border-radius:8px;cursor:pointer;">
+    <span class="cod-form-trigger__text">
+      <span>{{ 'sections.cod_form.trigger' | t }}</span>
+    </span>
+  </button>
+
+  {%- comment -%} Popup overlay {%- endcomment -%}
+  <div class="cod-form-overlay" id="cod-form-overlay" role="dialog" aria-modal="true" hidden>
     <div class="cod-form" id="cod-form-panel">
-      {%- comment -%} Free shipping announcement banner {%- endcomment -%}
-      <div class="cod-form__announcement" id="cod-announcement">
-        Δωρεάν αποστολή για παραγγελίες άνω των 40€!
-        <button type="button" class="cod-form__announcement-close" id="cod-form-close" aria-label="{{ 'accessibility.close' | t }}">×</button>
-      </div>
+      {%- comment -%} Announcement banner (populated by JS from config) {%- endcomment -%}
+      <div class="cod-form__announcement" id="cod-announcement" hidden></div>
 
-      {%- comment -%} Form — each field has data-field-id for JS layout engine {%- endcomment -%}
+      <button type="button" class="cod-form__close" id="cod-form-close" aria-label="Close">&times;</button>
+
       <form id="cod-order-form" novalidate>
-        <div class="cod-form__fields">
-          <div class="cod-form__field" data-field-id="first_name">
-            <label for="cod-first-name">{{ 'sections.cod_form.first_name' | t }} <span class="cod-required">*</span></label>
-            <input type="text" id="cod-first-name" name="first_name" required autocomplete="given-name">
-            <span class="cod-form__error" data-error="first_name"></span>
-          </div>
-          <div class="cod-form__field" data-field-id="last_name">
-            <label for="cod-last-name">{{ 'sections.cod_form.last_name' | t }} <span class="cod-required">*</span></label>
-            <input type="text" id="cod-last-name" name="last_name" required autocomplete="family-name">
-            <span class="cod-form__error" data-error="last_name"></span>
-          </div>
-          <div class="cod-form__field" data-field-id="phone">
-            <label for="cod-phone">{{ 'sections.cod_form.phone' | t }} <span class="cod-required">*</span></label>
-            <input type="tel" id="cod-phone" name="phone" required placeholder="69X XXX XXXX" autocomplete="tel">
-            <span class="cod-form__error" data-error="phone"></span>
-          </div>
-          <div class="cod-form__field" data-field-id="province">
-            <label for="cod-province">{{ 'sections.cod_form.province' | t }} <span class="cod-required">*</span></label>
-            <select id="cod-province" name="province" required autocomplete="address-level1">
-              <option value="">— {{ 'sections.cod_form.select_province' | t }} —</option>
-                            <option value="Αττική">Αττική</option>
-              <option value="Ανατολική Μακεδονία και Θράκη">Ανατολική Μακεδονία και Θράκη</option>
-              <option value="Βόρειο Αιγαίο">Βόρειο Αιγαίο</option>
-              <option value="Δυτική Ελλάδα">Δυτική Ελλάδα</option>
-              <option value="Δυτική Μακεδονία">Δυτική Μακεδονία</option>
-              <option value="Ήπειρος">Ήπειρος</option>
-              <option value="Θεσσαλία">Θεσσαλία</option>
-              <option value="Ιόνια Νησιά">Ιόνια Νησιά</option>
-              <option value="Κεντρική Μακεδονία">Κεντρική Μακεδονία</option>
-              <option value="Κρήτη">Κρήτη</option>
-              <option value="Νότιο Αιγαίο">Νότιο Αιγαίο</option>
-              <option value="Πελοπόννησος">Πελοπόννησος</option>
-              <option value="Στερεά Ελλάδα">Στερεά Ελλάδα</option>
-            </select>
-            <span class="cod-form__error" data-error="province"></span>
-          </div>
-          <div class="cod-form__field" data-field-id="city">
-            <label for="cod-city">{{ 'sections.cod_form.city' | t }} <span class="cod-required">*</span></label>
-            <input type="text" id="cod-city" name="city" required autocomplete="address-level2">
-            <span class="cod-form__error" data-error="city"></span>
-          </div>
-          <div class="cod-form__field" data-field-id="address1">
-            <label for="cod-address">{{ 'sections.cod_form.address' | t }} <span class="cod-required">*</span></label>
-            <input type="text" id="cod-address" name="address1" required autocomplete="street-address" placeholder="{{ 'sections.cod_form.address_placeholder' | t }}">
-            <span class="cod-form__error" data-error="address1"></span>
-          </div>
-          <div class="cod-form__field" data-field-id="zip">
-            <label for="cod-zip">{{ 'sections.cod_form.zip' | t }}</label>
-            <input type="text" id="cod-zip" name="zip" autocomplete="postal-code">
-            <span class="cod-form__error" data-error="zip"></span>
-          </div>
-          <div class="cod-form__field" data-field-id="email">
-            <label for="cod-email">{{ 'sections.cod_form.email' | t }}</label>
-            <input type="email" id="cod-email" name="email" autocomplete="email">
-            <span class="cod-form__error" data-error="email"></span>
-          </div>
+        {%- comment -%} Fields (labels come from locale config via JS) {%- endcomment -%}
+        <div class="cod-form__field" data-field="first_name">
+          <label for="cod-first-name">{{ 'sections.cod_form.first_name' | t }} <span class="cod-required">*</span></label>
+          <input type="text" id="cod-first-name" name="first_name" required autocomplete="given-name">
+        </div>
 
-          {%- comment -%} Additional standard fields — hidden by default, shown by JS config {%- endcomment -%}
-          <div class="cod-form__field" data-field-id="address2" hidden>
-            <label for="cod-address2">Διεύθυνση 2</label>
-            <input type="text" id="cod-address2" name="address2" placeholder="Διαμ., όροφος, κ.λπ." autocomplete="address-line2">
-            <span class="cod-form__error" data-error="address2"></span>
-          </div>
-          <div class="cod-form__field" data-field-id="company" hidden>
-            <label for="cod-company">Εταιρεία</label>
-            <input type="text" id="cod-company" name="company" autocomplete="organization">
-            <span class="cod-form__error" data-error="company"></span>
-          </div>
-          <div class="cod-form__field" data-field-id="note" hidden>
-            <label for="cod-note">Σημείωση παραγγελίας</label>
-            <textarea id="cod-note" name="note" rows="3" placeholder="Παρατηρήσεις ή ειδικές σημειώσεις"></textarea>
-            <span class="cod-form__error" data-error="note"></span>
-          </div>
-          <div class="cod-form__field" data-field-id="accepts_marketing" hidden>
-            <label class="cod-form__checkbox-label">
-              <input type="checkbox" name="accepts_marketing" value="1">
-              <span>Συμφωνώ να λαμβάνω προσφορές</span>
-            </label>
+        <div class="cod-form__field" data-field="last_name">
+          <label for="cod-last-name">{{ 'sections.cod_form.last_name' | t }} <span class="cod-required">*</span></label>
+          <input type="text" id="cod-last-name" name="last_name" required autocomplete="family-name">
+        </div>
+
+        <div class="cod-form__field" data-field="phone">
+          <label for="cod-phone">{{ 'sections.cod_form.phone' | t }} <span class="cod-required">*</span></label>
+          <input type="tel" id="cod-phone" name="phone" required autocomplete="tel">
+        </div>
+
+        <div class="cod-form__field" data-field="province">
+          <label for="cod-province">{{ 'sections.cod_form.province' | t }} <span class="cod-required">*</span></label>
+          <select id="cod-province" name="province" required>
+            <option value="">{{ 'sections.cod_form.select_province' | t }}</option>
+          </select>
+        </div>
+
+        <div class="cod-form__field" data-field="city">
+          <label for="cod-city">{{ 'sections.cod_form.city' | t }} <span class="cod-required">*</span></label>
+          <input type="text" id="cod-city" name="city" required autocomplete="address-level2">
+        </div>
+
+        <div class="cod-form__field" data-field="address1">
+          <label for="cod-address">{{ 'sections.cod_form.address' | t }} <span class="cod-required">*</span></label>
+          <input type="text" id="cod-address" name="address1" required autocomplete="street-address" placeholder="{{ 'sections.cod_form.address_placeholder' | t }}">
+        </div>
+
+        <div class="cod-form__field" data-field="zip">
+          <label for="cod-zip">{{ 'sections.cod_form.zip' | t }}</label>
+          <input type="text" id="cod-zip" name="zip" autocomplete="postal-code">
+        </div>
+
+        <div class="cod-form__field" data-field="email">
+          <label for="cod-email">{{ 'sections.cod_form.email' | t }}</label>
+          <input type="email" id="cod-email" name="email" autocomplete="email">
+        </div>
+
+        {%- comment -%} Product card {%- endcomment -%}
+        <div class="cod-form__product" id="cod-product-card">
+          <img class="cod-form__product-img" id="cod-product-img" src="{{ product.featured_image | image_url: width: 160 }}" alt="{{ product.title | escape }}" width="80" height="80">
+          <div class="cod-form__product-info">
+            <div class="cod-form__product-title">{{ product.title }}</div>
+            <div class="cod-form__product-price">
+              <span class="cod-form__price" id="cod-price">{{ product.selected_or_first_available_variant.price | money }}</span>
+              {%- if product.selected_or_first_available_variant.compare_at_price > product.selected_or_first_available_variant.price -%}
+                <span class="cod-form__compare-price" id="cod-compare-price">{{ product.selected_or_first_available_variant.compare_at_price | money }}</span>
+              {%- endif -%}
+            </div>
           </div>
         </div>
 
-        {%- comment -%} Quantity + Offers + Discount + Summary {%- endcomment -%}
+        {%- comment -%} Discount code (populated by JS if enabled) {%- endcomment -%}
+        <div class="cod-form__discount" id="cod-discount-section" hidden>
+          <a class="cod-form__discount-toggle" id="cod-discount-toggle" href="#">{{ 'sections.cod_form.discount_toggle' | t }}</a>
+          <div class="cod-form__discount-row" id="cod-discount-row" hidden>
+            <input type="text" id="cod-discount-code" placeholder="{{ 'sections.cod_form.discount_placeholder' | t }}" style="text-transform:uppercase">
+            <button type="button" id="cod-discount-apply">{{ 'sections.cod_form.discount_apply' | t }}</button>
+          </div>
+          <div id="cod-discount-result"></div>
+        </div>
+
+        {%- comment -%} Order summary {%- endcomment -%}
         <div class="cod-form__summary">
-          {%- comment -%} Quantity value (hidden — managed on product page, defaults to 1) {%- endcomment -%}
-          <input type="hidden" id="cod-qty" name="quantity" value="1">
-
-          {%- comment -%} Quantity offer tiers — hidden (no quantity selector in form) {%- endcomment -%}
-          <div class="cod-form__offers" id="cod-offers" hidden></div>
-
-          {%- comment -%} Quantity offer cards + variant selectors (replaces product card when active) {%- endcomment -%}
-          <div class="cod-form-offers" id="cod-form-offers" hidden></div>
-
-          {%- comment -%} Product card (image + title + price) — hidden by JS when offers are active {%- endcomment -%}
-          <div class="cod-form__header" id="cod-form-header">
-            {%- if product.featured_image -%}
-              <img
-                src="{{ product.featured_image | image_url: width: 80 }}"
-                alt="{{ product.featured_image.alt | escape }}"
-                width="80"
-                height="80"
-                class="cod-form__product-img"
-                loading="lazy"
-              >
-            {%- endif -%}
-            <div class="cod-form__product-info">
-              <strong class="cod-form__product-title">{{ product.title }}</strong>
-              {% unless product.selected_or_first_available_variant.title == "Default Title" %}
-              <span class="cod-form__product-variant" id="cod-variant-label">
-                {{ product.selected_or_first_available_variant.title }}
-              </span>
-              {% endunless %}
-              <span class="cod-form__price-wrap">
-                <span class="cod-form__product-price" id="cod-unit-price">
-                  {{ product.selected_or_first_available_variant.price | money }}
-                </span>
-                {%- if product.selected_or_first_available_variant.compare_at_price > product.selected_or_first_available_variant.price -%}
-                  <span class="cod-form__compare-price" id="cod-compare-price">
-                    {{ product.selected_or_first_available_variant.compare_at_price | money }}
-                  </span>
-                {%- else -%}
-                  <span class="cod-form__compare-price" id="cod-compare-price" hidden></span>
-                {%- endif -%}
-              </span>
-            </div>
-          </div>
-
-          {%- comment -%} Discount code {%- endcomment -%}
-          <div class="cod-form__discount">
-            <button type="button" class="cod-form__discount-toggle" id="cod-discount-toggle">
-              {{ 'sections.cod_form.discount_toggle' | t | default: 'Έχεις κωδικό έκπτωσης;' }}
-            </button>
-            <div class="cod-form__discount-input" id="cod-discount-input" hidden>
-              <input type="text" id="cod-discount-code" name="discount_code" placeholder="{{ 'sections.cod_form.discount_placeholder' | t | default: 'Βάλε τον κωδικό' }}" maxlength="50">
-              <button type="button" class="cod-form__discount-apply" id="cod-discount-apply">{{ 'sections.cod_form.discount_apply' | t | default: 'Εφαρμογή' }}</button>
-            </div>
-            <div class="cod-form__discount-result" id="cod-discount-result" hidden></div>
-          </div>
-
-          <div class="cod-form__line">
-            <span>{{ 'sections.cod_form.subtotal' | t }}</span>
-            <span id="cod-subtotal">{{ product.selected_or_first_available_variant.price | money }}</span>
-          </div>
-          <div class="cod-form__line cod-form__line--discount" id="cod-discount-line" hidden>
-            <span id="cod-discount-label">{{ 'sections.cod_form.discount' | t | default: 'Έκπτωση' }}</span>
-            <span id="cod-discount-amount"></span>
-          </div>
-          <div class="cod-form__line">
-            <span>{{ 'sections.cod_form.shipping' | t }}</span>
-            <span id="cod-shipping">{{ settings.delivery_cost | append: ',00' }} {{ cart.currency.iso_code | default: 'EUR' }}</span>
-          </div>
-          {%- comment -%} Shipping rate selection (populated by JS when multiple rates available) {%- endcomment -%}
-          <div class="cod-form__shipping-rates" id="cod-shipping-rates" hidden></div>
-          <div class="cod-form__line cod-form__line--fee" id="cod-fee-line" hidden>
-            <span id="cod-fee-label">Χρέωση αντικαταβολής</span>
-            <span id="cod-fee-amount"></span>
-          </div>
-          <div class="cod-form__line cod-form__line--bump" id="cod-bump-line" hidden>
-            <span>Προστέθηκαν προϊόντα</span>
-            <span id="cod-bump-amount"></span>
-          </div>
-          <div class="cod-form__line cod-form__line--total">
-            <strong>{{ 'sections.cod_form.total' | t }}</strong>
-            <strong id="cod-total"></strong>
-          </div>
+          <div class="cod-form__line"><span>{{ 'sections.cod_form.subtotal' | t }}</span><span id="cod-subtotal"></span></div>
+          <div class="cod-form__line cod-form__line--discount"><span id="cod-discount-label" style="color:var(--color-primary,#b5a1e0)">{{ 'sections.cod_form.discount' | t }}</span><span id="cod-discount-amount"></span></div>
+          <div class="cod-form__line"><span>{{ 'sections.cod_form.shipping' | t }}</span><span id="cod-shipping"></span></div>
+          <div class="cod-form__line" id="cod-fee-line"><span id="cod-fee-label"></span><span id="cod-fee-amount"></span></div>
+          <div class="cod-form__line" id="cod-added-products-line" style="color:var(--color-primary,#b5a1e0)"><span id="cod-added-label"></span><span id="cod-added-amount"></span></div>
+          <div class="cod-form__line cod-form__total-row"><span><b>{{ 'sections.cod_form.total' | t }}</b></span><span id="cod-total"><b></b></span></div>
         </div>
 
         {%- comment -%} Order bumps (populated by JS) {%- endcomment -%}
         <div class="cod-form__bumps" id="cod-bumps" hidden></div>
 
-        <button type="submit" class="cod-form__submit" id="cod-submit-btn">
+        {%- comment -%} Submit button {%- endcomment -%}
+        <button type="submit" class="cod-form__submit" id="cod-submit-btn"
+          style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;min-height:52px;padding:14px 24px;font-size:16px;font-weight:600;color:#fff;background:var(--color-primary,#b5a1e0);border:none;border-radius:8px;cursor:pointer;margin-top:16px;">
           <span class="cod-form__submit-text" style="display:flex;flex-direction:column;align-items:center;">
             <span>{{ 'sections.cod_form.submit' | t }}</span>
-            <span style="font-size:0.75rem;text-transform:uppercase;opacity:0.85;margin-top:2px;">ΑΝΤΙΚΑΤΑΒΟΛΗ</span>
+            <span style="font-size:0.75rem;text-transform:uppercase;opacity:0.85;margin-top:2px;">PLATA LA LIVRARE</span>
           </span>
           <span class="cod-form__submit-loading" hidden>
             <svg width="20" height="20" viewBox="0 0 24 24" class="cod-spinner"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="3" stroke-dasharray="31.4" stroke-linecap="round"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="0.8s" repeatCount="indefinite"/></circle></svg>
-            {{ 'sections.cod_form.processing' | t }}
           </span>
         </button>
+
+        {%- comment -%} Prepaid button (populated by JS if enabled) {%- endcomment -%}
+        <div id="cod-prepaid-wrapper" hidden></div>
       </form>
 
-      {%- comment -%} Success state {%- endcomment -%}
+      {%- comment -%} Success screen {%- endcomment -%}
       <div class="cod-form__success" id="cod-success" hidden>
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--color-success, #2E7D32)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
-        <h3>{{ 'sections.cod_form.success_title' | t }}</h3>
-        <p class="cod-form__order-name" id="cod-order-name"></p>
-        <p>{{ 'sections.cod_form.success_text' | t }}</p>
-        <div class="cod-form__upsells" id="cod-upsells" hidden></div>
-        <button type="button" class="cod-form__submit" id="cod-success-close">{{ 'sections.cod_form.close' | t }}</button>
+        <div class="cod-form__success-icon">✓</div>
+        <h3 id="cod-success-title">{{ 'sections.cod_form.success_title' | t }}</h3>
+        <p id="cod-success-text">{{ 'sections.cod_form.success_text' | t }}</p>
+        <p id="cod-success-order"></p>
+        <div id="cod-upsell-container"></div>
+        <button type="button" class="cod-form__submit" id="cod-success-close"
+          style="background:var(--color-primary,#b5a1e0);color:#fff;border:none;padding:14px;border-radius:8px;width:100%;font-size:16px;font-weight:600;cursor:pointer;">
+          {{ 'sections.cod_form.close' | t }}
+        </button>
       </div>
 
-      {%- comment -%} Error state {%- endcomment -%}
-      <div class="cod-form__error-box" id="cod-error-box" hidden>
+      {%- comment -%} Error screen {%- endcomment -%}
+      <div class="cod-form__error" id="cod-error" hidden>
         <p id="cod-error-msg"></p>
+        <button type="button" id="cod-error-retry" class="cod-form__submit"
+          style="background:var(--color-primary,#b5a1e0);color:#fff;border:none;padding:14px;border-radius:8px;width:100%;font-size:16px;font-weight:600;cursor:pointer;">
+          Retry
+        </button>
       </div>
     </div>
   </div>
 
-  <script
-    src="{{ 'cod-form.js' | asset_url }}"
-    defer
-    data-cod-api-url="{{ settings.cod_api_url }}"
-    data-cod-api-key="{{ settings.cod_api_key }}"
-    data-store-id="{{ section.settings.store_id }}"
-    data-product-id="{{ product.id }}"
-    data-variant-id="{{ product.selected_or_first_available_variant.id }}"
-    data-unit-price="{{ product.selected_or_first_available_variant.price | divided_by: 100.0 }}"
-    data-compare-price="{% if product.selected_or_first_available_variant.compare_at_price > product.selected_or_first_available_variant.price %}{{ product.selected_or_first_available_variant.compare_at_price | divided_by: 100.0 }}{% else %}0{% endif %}"
-    data-shipping-price="{{ settings.delivery_cost | append: '.00' }}"
-    data-currency="{{ cart.currency.iso_code | default: 'EUR' }}"
-    data-variants='{%- unless product.has_only_default_variant -%}[{%- for variant in product.variants -%}{%- unless forloop.first -%},{%- endunless -%}{"id":{{ variant.id }},"t":{{ variant.title | json }},"p":{{ variant.price | divided_by: 100.0 }},"cp":{% if variant.compare_at_price %}{{ variant.compare_at_price | divided_by: 100.0 }}{% else %}0{% endif %},"img":"{% if variant.image %}{{ variant.image | image_url: width: 200 }}{% endif %}","ok":{{ variant.available }}}{%- endfor -%}]{%- endunless -%}'
-    data-variant-option-name="{{ product.options.first }}"
-    data-gads-conversion-id="{{ settings.cod_gads_conversion_id }}"
-  ></script>
-{%- endif -%}
+  {%- comment -%} Sticky buy bar (populated by JS if enabled) {%- endcomment -%}
+  <div id="cod-sticky-bar" hidden></div>
+</div>
+
+<script
+  src="{{ 'cod-form.js' | asset_url }}"
+  defer
+  data-cod-api-url="https://api.magazinultarii.ro"
+  data-shop="{{ shop.permanent_domain }}"
+  data-product-id="{{ product.id }}"
+  data-variant-id="{{ product.selected_or_first_available_variant.id }}"
+  data-unit-price="{{ product.selected_or_first_available_variant.price | divided_by: 100.0 }}"
+  {% if product.selected_or_first_available_variant.compare_at_price > product.selected_or_first_available_variant.price %}
+    data-compare-price="{{ product.selected_or_first_available_variant.compare_at_price | divided_by: 100.0 }}"
+  {% endif %}
+  data-currency="{{ cart.currency.iso_code }}"
+  data-product-title="{{ product.title | escape }}"
+  data-product-image="{{ product.featured_image | image_url: width: 160 }}"
+></script>
+{% endif %}
 
 {% schema %}
 {
-  "name": "t:sections.cod_form.name",
-  "settings": [
-    {
-      "type": "select",
-      "id": "store_id",
-      "label": "t:sections.cod_form.store_id",
-      "options": [
-        {
-          "value": "store_1",
-          "label": "Store 1 (PrietenBebe)"
-        },
-        {
-          "value": "store_2",
-          "label": "Store 2 (AirForm)"
-        },
-        {
-          "value": "store_3",
-          "label": "Store 3 (MagazinulTării)"
-        },
-        {
-          "value": "store_4",
-          "label": "BebeMate (GR)"
-        }
-      ],
-      "default": "store_4"
-    }
-  ]
+  "name": "COD Order Form",
+  "target": "section",
+  "settings": []
 }
 {% endschema %}

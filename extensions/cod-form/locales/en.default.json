@@ -1,0 +1,32 @@
+{
+  "accessibility": {
+    "close": "Close"
+  },
+  "sections": {
+    "cod_form": {
+      "trigger": "Order with Cash on Delivery",
+      "first_name": "First Name",
+      "last_name": "Last Name",
+      "phone": "Phone",
+      "province": "Province",
+      "select_province": "— Select province —",
+      "city": "City",
+      "address": "Address",
+      "address_placeholder": "Street, number, apt.",
+      "zip": "Postal Code",
+      "email": "Email (optional)",
+      "discount_toggle": "Have a discount code?",
+      "discount_placeholder": "ENTER CODE",
+      "discount_apply": "Apply",
+      "subtotal": "Subtotal",
+      "discount": "Discount",
+      "shipping": "Shipping",
+      "total": "Total",
+      "submit": "Place Order",
+      "processing": "Processing...",
+      "success_title": "Order placed successfully!",
+      "success_text": "We will contact you soon.",
+      "close": "Close"
+    }
+  }
+}

@@ -100,31 +100,8 @@ const queryClient = new QueryClient({
 });
 
 function AppContent() {
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const navItems = [
-    { url: "/", label: "Dashboard", icon: HomeIcon },
-    { url: "/config", label: "Config", icon: SettingsIcon },
-    { url: "/orders", label: "Orders", icon: OrderIcon },
-    { url: "/blacklists", label: "Blacklists", icon: ShieldCheckMarkIcon },
-    { url: "/settings", label: "Settings", icon: AdjustIcon },
-  ];
-
   return (
-    <Frame
-      navigation={
-        <Navigation location={location.pathname}>
-          <Navigation.Section
-            items={navItems.map((item) => ({
-              ...item,
-              selected: location.pathname === item.url,
-              onClick: () => navigate(item.url),
-            }))}
-          />
-        </Navigation>
-      }
-    >
+    <Frame>
       <ErrorBoundary>
         <StoreProvider>
           <Routes>
