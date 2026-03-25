@@ -105,6 +105,16 @@ async def analytics(
             }
         )
 
+    # Top products by order count
+    product_rows = await pool.fetch(
+        """SELECT variant_id, COUNT(*) as cnt FROM orders
+           WHERE shop_id = $1 AND created_at > $2 AND variant_id IS NOT NULL
+           GROUP BY variant_id ORDER BY cnt DESC LIMIT 10""",
+        shop_id,
+        cutoff_dt,
+    )
+    top_products = [{"variant_id": r["variant_id"], "orders": r["cnt"]} for r in product_rows]
+
     return {
         "form_opens": form_opens,
         "orders": order_count,
@@ -113,6 +123,7 @@ async def analytics(
         "avg_order_value": avg_order_value,
         "daily": daily,
         "utm_data": utm_data,
+        "top_products": top_products,
         "period_days": days,
     }
 
