@@ -70,38 +70,36 @@
           <input type="email" id="cod-email" name="email" autocomplete="email">
         </div>
 
-        {%- comment -%} Product card {%- endcomment -%}
-        <div class="cod-form__product" id="cod-product-card">
-          <img class="cod-form__product-img" id="cod-product-img" src="{{ product.featured_image | image_url: width: 160 }}" alt="{{ product.title | escape }}" width="80" height="80">
-          <div class="cod-form__product-info">
-            <div class="cod-form__product-title">{{ product.title }}</div>
-            <div class="cod-form__product-price">
-              <span class="cod-form__price" id="cod-price">{{ product.selected_or_first_available_variant.price | money }}</span>
-              {%- if product.selected_or_first_available_variant.compare_at_price > product.selected_or_first_available_variant.price -%}
-                <span class="cod-form__compare-price" id="cod-compare-price">{{ product.selected_or_first_available_variant.compare_at_price | money }}</span>
-              {%- endif -%}
+        {%- comment -%} Product + Discount + Summary — one bordered card like BebeMate {%- endcomment -%}
+        <div class="cod-form__summary">
+          <div class="cod-form__header" id="cod-product-card">
+            <img class="cod-form__product-img" id="cod-product-img" src="{{ product.featured_image | image_url: width: 160 }}" alt="{{ product.title | escape }}" width="80" height="80">
+            <div class="cod-form__product-info">
+              <div class="cod-form__product-title">{{ product.title }}</div>
+              <div class="cod-form__price-wrap">
+                <span class="cod-form__product-price" id="cod-price">{{ product.selected_or_first_available_variant.price | money }}</span>
+                {%- if product.selected_or_first_available_variant.compare_at_price > product.selected_or_first_available_variant.price -%}
+                  <span class="cod-form__compare-price" id="cod-compare-price">{{ product.selected_or_first_available_variant.compare_at_price | money }}</span>
+                {%- endif -%}
+              </div>
             </div>
           </div>
-        </div>
 
-        {%- comment -%} Discount code (populated by JS if enabled) {%- endcomment -%}
-        <div class="cod-form__discount" id="cod-discount-section" hidden>
-          <a class="cod-form__discount-toggle" id="cod-discount-toggle" href="#">{{ 'sections.cod_form.discount_toggle' | t }}</a>
-          <div class="cod-form__discount-row" id="cod-discount-row" hidden>
-            <input type="text" id="cod-discount-code" placeholder="{{ 'sections.cod_form.discount_placeholder' | t }}" style="text-transform:uppercase">
-            <button type="button" id="cod-discount-apply">{{ 'sections.cod_form.discount_apply' | t }}</button>
+          <div class="cod-form__discount" id="cod-discount-section" hidden>
+            <a class="cod-form__discount-toggle" id="cod-discount-toggle" href="#">{{ 'sections.cod_form.discount_toggle' | t }}</a>
+            <div class="cod-form__discount-row" id="cod-discount-row" hidden>
+              <input type="text" id="cod-discount-code" placeholder="{{ 'sections.cod_form.discount_placeholder' | t }}" style="text-transform:uppercase">
+              <button type="button" id="cod-discount-apply">{{ 'sections.cod_form.discount_apply' | t }}</button>
+            </div>
+            <div id="cod-discount-result"></div>
           </div>
-          <div id="cod-discount-result"></div>
-        </div>
 
-        {%- comment -%} Order summary {%- endcomment -%}
-        <div class="cod-form__summary">
           <div class="cod-form__line"><span>{{ 'sections.cod_form.subtotal' | t }}</span><span id="cod-subtotal"></span></div>
           <div class="cod-form__line cod-form__line--discount"><span id="cod-discount-label" style="color:var(--color-primary,#b5a1e0)">{{ 'sections.cod_form.discount' | t }}</span><span id="cod-discount-amount"></span></div>
           <div class="cod-form__line"><span>{{ 'sections.cod_form.shipping' | t }}</span><span id="cod-shipping"></span></div>
           <div class="cod-form__line" id="cod-fee-line"><span id="cod-fee-label"></span><span id="cod-fee-amount"></span></div>
           <div class="cod-form__line" id="cod-added-products-line" style="color:var(--color-primary,#b5a1e0)"><span id="cod-added-label"></span><span id="cod-added-amount"></span></div>
-          <div class="cod-form__line cod-form__total-row"><span><b>{{ 'sections.cod_form.total' | t }}</b></span><span id="cod-total"><b></b></span></div>
+          <div class="cod-form__line cod-form__line--total"><span><b>{{ 'sections.cod_form.total' | t }}</b></span><span id="cod-total"><b></b></span></div>
         </div>
 
         {%- comment -%} Order bumps (populated by JS) {%- endcomment -%}
