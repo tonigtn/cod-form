@@ -122,7 +122,7 @@ _RO_LABELS: dict[str, str] = {
     "address_placeholder": "Strada, nr., bl., sc., ap.",
     "zip": "Cod poștal",
     "email": "Email",
-    "announcement": "",
+    "announcement": "Transport gratuit pentru comenzi peste 150 lei!",
 }
 
 _EL_LABELS: dict[str, str] = {
