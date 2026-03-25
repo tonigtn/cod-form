@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import time
 from typing import Any
 
@@ -294,7 +295,13 @@ async def load_store_config(shop_id: int) -> CodStoreConfig:
 
     merged: dict[str, Any] = {}
     for row in rows:
-        merged[row["section"]] = row["config"]
+        val = row["config"]
+        if isinstance(val, str):
+            import json
+
+            with contextlib.suppress(json.JSONDecodeError, TypeError):
+                val = json.loads(val)
+        merged[row["section"]] = val
 
     try:
         config = CodStoreConfig.model_validate(merged)
@@ -328,7 +335,14 @@ async def load_config_dict(shop_id: int) -> dict[str, Any]:
     rows = await pool.fetch("SELECT section, config FROM shop_configs WHERE shop_id = $1", shop_id)
     result: dict[str, Any] = {}
     for row in rows:
-        result[row["section"]] = row["config"]
+        val = row["config"]
+        # asyncpg may return JSONB as string — parse it
+        if isinstance(val, str):
+            import json
+
+            with contextlib.suppress(json.JSONDecodeError, TypeError):
+                val = json.loads(val)
+        result[row["section"]] = val
     return result
 
 

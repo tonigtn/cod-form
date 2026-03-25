@@ -14,11 +14,19 @@ log = structlog.get_logger(__name__)
 _pool: asyncpg.Pool[asyncpg.Record] | None = None
 
 
+async def _init_connection(conn: asyncpg.Connection) -> None:
+    """Register JSON codec so JSONB columns return dicts, not strings."""
+    import json
+
+    await conn.set_type_codec("jsonb", encoder=json.dumps, decoder=json.loads, schema="pg_catalog")
+    await conn.set_type_codec("json", encoder=json.dumps, decoder=json.loads, schema="pg_catalog")
+
+
 async def init_pool() -> None:
     """Create the connection pool. Called during app lifespan startup."""
     global _pool  # noqa: PLW0603
     url = get_database_url()
-    _pool = await asyncpg.create_pool(url, min_size=2, max_size=10)
+    _pool = await asyncpg.create_pool(url, min_size=2, max_size=10, init=_init_connection)
     log.info("db_pool_created")
 
 
