@@ -103,19 +103,16 @@ SessionUser = Annotated[dict[str, str], Depends(_verify_session_token)]
 @router.get("/api/admin/me")
 async def get_current_store(user: SessionUser) -> dict[str, object]:
     """Return the current store identity from the authenticated session."""
-    from app.shopify.tokens import get_shop_info, list_shops
+    from app.shopify.tokens import get_shop_info
 
     shop = user["shop"]
     info = await get_shop_info(shop)
     if not info:
         raise HTTPException(status_code=403, detail=f"Shop not installed: {shop}")
 
-    all_shops = await list_shops()
-
     return {
         "shop": shop,
         "store_name": info.get("store_name", shop),
         "locale": info.get("locale", "ro"),
         "currency": info.get("currency", "RON"),
-        "all_stores": all_shops,
     }
