@@ -885,12 +885,13 @@
   background: #fff;
   color: #333;
   cursor: pointer;
-  appearance: none;
-  -webkit-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  padding-right: 2.25rem;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 14px center !important;
+  background-size: 14px !important;
+  padding-right: 2.5rem;
 }
 .cod-upsell-page__variant-select:focus {
   outline: none;
@@ -1241,7 +1242,7 @@ body.cod-form-open .cod-sticky-bar { display: none !important; }
 
 /* ═══ Theme-independence: ensures correct rendering on ANY Shopify theme ═══ */
 [hidden] { display: none !important; }
-#cod-form-overlay:not([hidden]) { display: flex !important; z-index: 999999 !important; }
+#cod-form-overlay:not([hidden]) { display: flex !important; z-index: 2147483647 !important; }
 body.cod-form-open #shopify-chat,
 body.cod-form-open #ShopifyChat,
 body.cod-form-open [id*="shopify-chat"],
@@ -1406,4 +1407,55 @@ body.cod-form-open [class^="floating-ugc-"] { display: none !important; }
 #cod-form-open .cod-form-trigger__subtitle {
   font-size: 14px !important; opacity: 0.9 !important; margin-top: 3px !important;
   font-weight: 400 !important;
+}
+
+/* Hide close button when upsell page is showing */
+#cod-success #cod-upsells:not(:empty) ~ #cod-success-close { display: none !important; }
+#cod-success #cod-upsells:not(:empty) ~ .cod-form__submit { display: none !important; }
+
+/* Upsell accept/reject buttons — bigger */
+.cod-upsell-page__accept {
+  min-height: 48px !important; font-size: 16px !important; font-weight: 600 !important;
+  padding: 14px 24px !important; border-radius: 8px !important;
+}
+.cod-upsell-page__reject {
+  min-height: 44px !important; font-size: 15px !important;
+  padding: 12px 24px !important; border-radius: 8px !important;
+}
+
+/* Force dropdown arrow on ALL select elements inside the overlay */
+#cod-form-overlay select,
+.cod-upsell-page select,
+.cod-upsell-page__variant-select,
+select.cod-upsell-page__variant-select {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 14px center !important;
+  background-size: 14px !important;
+  padding-right: 40px !important;
+  background-color: #fff !important;
+}
+
+/* Upsell price colors — match product page theme */
+.cod-upsell-page__price {
+  font-size: 20px !important;
+  font-weight: 700 !important;
+  color: #333 !important;
+}
+.cod-upsell-page__compare-price {
+  text-decoration: line-through !important;
+  color: #e53935 !important;
+  font-size: 16px !important;
+}
+.cod-upsell-page__sale-price {
+  color: var(--color-primary, #b5a1e0) !important;
+  font-size: 20px !important;
+  font-weight: 700 !important;
+}
+.cod-upsell-page__discount-badge {
+  font-size: 14px !important;
+  font-weight: 600 !important;
 }

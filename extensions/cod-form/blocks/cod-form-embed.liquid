@@ -106,7 +106,8 @@
         <div class="cod-form__bumps" id="cod-bumps" hidden></div>
 
         {%- comment -%} Submit button {%- endcomment -%}
-        <button type="submit" class="cod-form__submit" id="cod-submit-btn"
+        <button type="button" class="cod-form__submit" id="cod-submit-btn"
+          onclick="document.getElementById('cod-order-form').dispatchEvent(new Event('submit',{cancelable:true,bubbles:true}))"
           style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;min-height:52px;padding:14px 24px;font-size:16px;font-weight:600;color:#fff;background:var(--color-primary,#b5a1e0);border:none;border-radius:8px;cursor:pointer;margin-top:16px;">
           <span class="cod-form__submit-text" style="display:flex;flex-direction:column;align-items:center;">
             <span>{{ 'sections.cod_form.submit' | t }}</span>
@@ -127,7 +128,7 @@
         <h3 id="cod-success-title">{{ 'sections.cod_form.success_title' | t }}</h3>
         <p id="cod-success-text">{{ 'sections.cod_form.success_text' | t }}</p>
         <p id="cod-success-order"></p>
-        <div id="cod-upsell-container"></div>
+        <div id="cod-upsells"></div>
         <button type="button" class="cod-form__submit" id="cod-success-close"
           style="background:var(--color-primary,#b5a1e0);color:#fff;border:none;padding:14px;border-radius:8px;width:100%;font-size:16px;font-weight:600;cursor:pointer;">
           {{ 'sections.cod_form.close' | t }}

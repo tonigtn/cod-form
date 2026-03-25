@@ -1119,6 +1119,11 @@ function renderBumps() {
     if (successTitle && labels.success_title) successTitle.textContent = labels.success_title;
     var successText = $('cod-success-text');
     if (successText && labels.success_text) successText.textContent = labels.success_text;
+    var successClose = $('cod-success-close');
+    if (successClose && labels.close) successClose.textContent = labels.close;
+    // Error retry button
+    var errorRetry = $('cod-error-retry');
+    if (errorRetry && labels.retry) errorRetry.textContent = labels.retry;
   }
 
   function fetchFormConfig() {
@@ -1992,12 +1997,15 @@ function renderBumps() {
     var successDiv = $('cod-success');
     if (successDiv) {
       successDiv.hidden = false;
-      // Hide all success children except #cod-upsells
+      // Hide ALL success children except #cod-upsells
       for (var si = 0; si < successDiv.children.length; si++) {
         if (successDiv.children[si].id !== 'cod-upsells') {
           successDiv.children[si].style.display = 'none';
         }
       }
+      // Explicitly hide the close button during upsell
+      var closeBtn = $('cod-success-close');
+      if (closeBtn) closeBtn.style.display = 'none';
     }
     // Show loading in upsell container
     var preContainer = $('cod-upsells');
