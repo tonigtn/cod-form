@@ -1108,13 +1108,6 @@ function renderBumps() {
     if (announce && labels.announcement) {
       announce.textContent = labels.announcement;
       announce.hidden = false;
-      // Add close button
-      var closeBtn = document.createElement('button');
-      closeBtn.textContent = '\u00d7';
-      closeBtn.style.cssText = 'position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:18px;cursor:pointer;color:inherit;';
-      closeBtn.onclick = function() { announce.hidden = true; };
-      announce.style.position = 'relative';
-      announce.appendChild(closeBtn);
     }
 
     // Success screen
