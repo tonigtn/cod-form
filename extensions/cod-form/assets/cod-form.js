@@ -1013,6 +1013,117 @@ function renderBumps() {
     submitBtn.parentNode.insertBefore(wrapper, submitBtn.nextSibling);
   }
 
+  /* ── Apply locale labels to form — overrides static English from liquid ── */
+  function applyLocaleLabels(locale) {
+    if (!locale) return;
+    var labels = locale.labels || {};
+    var overlay = $('cod-form-overlay');
+    if (!overlay) return;
+
+    // Map field data-field attribute to locale label key
+    var fieldMap = {
+      'first_name': 'first_name',
+      'last_name': 'last_name',
+      'phone': 'phone',
+      'province': 'province',
+      'city': 'city',
+      'address1': 'address',
+      'zip': 'zip',
+      'email': 'email'
+    };
+    for (var field in fieldMap) {
+      var el = overlay.querySelector('[data-field="' + field + '"] label');
+      if (el && labels[fieldMap[field]]) {
+        var required = el.querySelector('.cod-required');
+        el.textContent = labels[fieldMap[field]] + ' ';
+        if (required) el.appendChild(required);
+      }
+    }
+
+    // Phone placeholder
+    if (locale.phone_placeholder) {
+      var phoneInput = overlay.querySelector('#cod-phone');
+      if (phoneInput) phoneInput.placeholder = locale.phone_placeholder;
+    }
+
+    // Address placeholder
+    if (labels.address_placeholder) {
+      var addrInput = overlay.querySelector('#cod-address');
+      if (addrInput) addrInput.placeholder = labels.address_placeholder;
+    }
+
+    // Province selector — populate options
+    if (locale.provinces && locale.provinces.length) {
+      var sel = overlay.querySelector('#cod-province');
+      if (sel) {
+        var currentVal = sel.value;
+        sel.innerHTML = '<option value="">\u2014 ' + (labels.select_province || labels.province || 'Select') + ' \u2014</option>';
+        for (var i = 0; i < locale.provinces.length; i++) {
+          var opt = document.createElement('option');
+          opt.value = locale.provinces[i];
+          opt.textContent = locale.provinces[i];
+          sel.appendChild(opt);
+        }
+        if (currentVal) sel.value = currentVal;
+      }
+    }
+
+    // Submit button text
+    var submitBtn = $('cod-submit-btn');
+    if (submitBtn && labels.submit) {
+      var textSpan = submitBtn.querySelector('.cod-form__submit-text');
+      if (textSpan) {
+        var subtitleText = labels.submit_subtitle || 'PLATA LA LIVRARE';
+        textSpan.innerHTML = '<span>' + labels.submit + '</span>'
+          + '<span style="font-size:0.75rem;text-transform:uppercase;opacity:0.85;margin-top:2px;">' + subtitleText + '</span>';
+      }
+    }
+
+    // Trigger button text
+    var triggerText = document.getElementById('cod-trigger-text');
+    if (triggerText && labels.submit) {
+      triggerText.textContent = L.submit || labels.submit || triggerText.textContent;
+    }
+
+    // Discount toggle
+    var discToggle = $('cod-discount-toggle');
+    if (discToggle && labels.have_discount) discToggle.textContent = labels.have_discount;
+    var discApply = $('cod-discount-apply');
+    if (discApply && labels.apply) discApply.textContent = labels.apply;
+    var discInput = $('cod-discount-code');
+    if (discInput && labels.enter_code) discInput.placeholder = labels.enter_code.toUpperCase();
+
+    // Summary labels
+    var summaryLabels = overlay.querySelectorAll('.cod-form__line');
+    if (summaryLabels.length >= 4) {
+      if (labels.subtotal) summaryLabels[0].querySelector('span').textContent = labels.subtotal;
+      if (labels.discount) { var dl = $('cod-discount-label'); if (dl) dl.textContent = labels.discount; }
+      if (labels.shipping) summaryLabels[2].querySelector('span').textContent = labels.shipping;
+    }
+    var totalRow = overlay.querySelector('.cod-form__total-row');
+    if (totalRow && labels.total) totalRow.querySelector('span').innerHTML = '<b>' + labels.total + '</b>';
+
+    // Announcement
+    var announce = $('cod-announcement');
+    if (announce && labels.announcement) {
+      announce.textContent = labels.announcement;
+      announce.hidden = false;
+      // Add close button
+      var closeBtn = document.createElement('button');
+      closeBtn.textContent = '\u00d7';
+      closeBtn.style.cssText = 'position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:18px;cursor:pointer;color:inherit;';
+      closeBtn.onclick = function() { announce.hidden = true; };
+      announce.style.position = 'relative';
+      announce.appendChild(closeBtn);
+    }
+
+    // Success screen
+    var successTitle = $('cod-success-title');
+    if (successTitle && labels.success_title) successTitle.textContent = labels.success_title;
+    var successText = $('cod-success-text');
+    if (successText && labels.success_text) successText.textContent = labels.success_text;
+  }
+
   function fetchFormConfig() {
     if (!COD_API || !STORE_ID) return;
     fetch(COD_API + '/api/cod/form-config?shop=' + encodeURIComponent(SHOP))
@@ -1028,6 +1139,8 @@ function renderBumps() {
           codFeeLabel = L.cod_fee;
           CURRENCY = cfg.locale.currency || CURRENCY;
         }
+        // Apply locale labels to form fields (overrides static English from liquid)
+        if (cfg.locale) applyLocaleLabels(cfg.locale);
         // Product restriction check — hide form if product excluded
         if (cfg.settings && checkProductRestriction(cfg.settings) === false) return;
         applyFormConfig(cfg);

@@ -103,6 +103,7 @@ _RO_LABELS: dict[str, str] = {
     "processing": "Se procesează...",
     "submit": "Plasează comanda",
     "submit_subtitle": "PLATA LA LIVRARE",
+    "bumps_heading": "Adaugă la comandă:",
     "subtotal": "Subtotal",
     "shipping": "Transport",
     "discount": "Reducere",
