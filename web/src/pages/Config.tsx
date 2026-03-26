@@ -96,7 +96,7 @@ export function Config() {
                 <Tabs tabs={tabs} selected={tabIndex} onSelect={setTabIndex}>
                   <div style={{ padding: "16px" }}>
                     {tabIndex === 0 && (
-                      <FormTab draft={draft} setDraft={setDraft} save={save} storeId={storeId} />
+                      <FormTab draft={draft} setDraft={setDraft} save={save} storeId={storeId} locale={localeData?.locale} />
                     )}
                     {tabIndex === 1 && (
                       <ButtonStyleTab draft={draft} setDraft={setDraft} save={save} storeId={storeId} />
@@ -224,9 +224,10 @@ interface TabProps {
   setDraft: (fn: (d: StoreConfig) => StoreConfig) => void;
   save: (section: string, data: Record<string, unknown>) => void;
   storeId: string;
+  locale?: import("../api/hooks").StoreLocale;
 }
 
-function FormTab({ draft, setDraft, save }: TabProps) {
+function FormTab({ draft, setDraft, save, locale }: TabProps) {
   const layoutFields = draft.form.layout?.fields ?? [];
   const fs = draft.form_style ?? DEFAULTS_FORM_STYLE;
   const setFs = (key: string, v: string) =>
@@ -309,6 +310,7 @@ function FormTab({ draft, setDraft, save }: TabProps) {
         </Text>
         <FormBuilder
           fields={layoutFields}
+          locale={locale}
           onChange={(fields: FormField[]) =>
             setDraft((d) => ({
               ...d,

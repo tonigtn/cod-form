@@ -29,23 +29,29 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { FormField } from "../api/types";
+import type { StoreLocale } from "../api/hooks";
 
-const DEFAULT_FIELDS: FormField[] = [
-  { id: "first_name", label: "Prenume", placeholder: "", field_type: "text", visible: true, required: true, order: 0, half_width: true, options: [] },
-  { id: "last_name", label: "Nume", placeholder: "", field_type: "text", visible: true, required: true, order: 1, half_width: true, options: [] },
-  { id: "phone", label: "Telefon", placeholder: "07XX XXX XXX", field_type: "tel", visible: true, required: true, order: 2, half_width: false, options: [] },
-  { id: "province", label: "Jude\u021b", placeholder: "", field_type: "select", visible: true, required: true, order: 3, half_width: false, options: [] },
-  { id: "city", label: "Localitate", placeholder: "", field_type: "text", visible: true, required: true, order: 4, half_width: false, options: [] },
-  { id: "address1", label: "Adres\u0103", placeholder: "Strada, nr, bloc, scara, ap", field_type: "text", visible: true, required: true, order: 5, half_width: false, options: [] },
-  { id: "zip", label: "Cod po\u0219tal", placeholder: "", field_type: "text", visible: true, required: false, order: 6, half_width: true, options: [] },
-  { id: "email", label: "Email", placeholder: "", field_type: "email", visible: true, required: false, order: 7, half_width: true, options: [] },
-];
+function buildDefaultFields(locale?: StoreLocale): FormField[] {
+  const L = locale?.labels || {};
+  return [
+    { id: "first_name", label: L.first_name || "First Name", placeholder: "", field_type: "text", visible: true, required: true, order: 0, half_width: true, options: [] },
+    { id: "last_name", label: L.last_name || "Last Name", placeholder: "", field_type: "text", visible: true, required: true, order: 1, half_width: true, options: [] },
+    { id: "phone", label: L.phone || "Phone", placeholder: locale?.phone_placeholder || "", field_type: "tel", visible: true, required: true, order: 2, half_width: false, options: [] },
+    { id: "province", label: L.province || "Province", placeholder: "", field_type: "select", visible: true, required: true, order: 3, half_width: false, options: [] },
+    { id: "city", label: L.city || "City", placeholder: "", field_type: "text", visible: true, required: true, order: 4, half_width: false, options: [] },
+    { id: "address1", label: L.address || "Address", placeholder: L.address_placeholder || "", field_type: "text", visible: true, required: true, order: 5, half_width: false, options: [] },
+    { id: "zip", label: L.zip || "Postal Code", placeholder: "", field_type: "text", visible: true, required: false, order: 6, half_width: true, options: [] },
+    { id: "email", label: L.email || "Email", placeholder: "", field_type: "email", visible: true, required: false, order: 7, half_width: true, options: [] },
+  ];
+}
+
+const DEFAULT_FIELDS = buildDefaultFields();
 
 const ADDITIONAL_SHOPIFY_FIELDS: FormField[] = [
-  { id: "address2", label: "Adres\u0103 2", placeholder: "Apt, etaj, etc.", field_type: "text", visible: true, required: false, order: 99, half_width: false, options: [] },
-  { id: "company", label: "Firm\u0103", placeholder: "", field_type: "text", visible: true, required: false, order: 99, half_width: false, options: [] },
-  { id: "note", label: "Not\u0103 comand\u0103", placeholder: "Observa\u021bii sau men\u021biuni speciale", field_type: "textarea", visible: true, required: false, order: 99, half_width: false, options: [] },
-  { id: "accepts_marketing", label: "Sunt de acord s\u0103 primesc oferte", placeholder: "", field_type: "checkbox", visible: true, required: false, order: 99, half_width: false, options: [] },
+  { id: "address2", label: "Address 2", placeholder: "", field_type: "text", visible: true, required: false, order: 99, half_width: false, options: [] },
+  { id: "company", label: "Company", placeholder: "", field_type: "text", visible: true, required: false, order: 99, half_width: false, options: [] },
+  { id: "note", label: "Order note", placeholder: "", field_type: "textarea", visible: true, required: false, order: 99, half_width: false, options: [] },
+  { id: "accepts_marketing", label: "Accept marketing", placeholder: "", field_type: "checkbox", visible: true, required: false, order: 99, half_width: false, options: [] },
 ];
 
 const ALL_STANDARD_IDS = new Set([
@@ -71,6 +77,7 @@ interface Props {
   fields: FormField[];
   onChange: (fields: FormField[]) => void;
   onSave: () => void;
+  locale?: StoreLocale;
 }
 
 function OptionsEditor({
@@ -294,7 +301,7 @@ function SortableField({
   );
 }
 
-export function FormBuilder({ fields, onChange, onSave }: Props) {
+export function FormBuilder({ fields, onChange, onSave, locale }: Props) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [showAddShopify, setShowAddShopify] = useState(false);
   const [showAddCustom, setShowAddCustom] = useState(false);
@@ -302,7 +309,7 @@ export function FormBuilder({ fields, onChange, onSave }: Props) {
   const [newFieldLabel, setNewFieldLabel] = useState("");
   const [newFieldType, setNewFieldType] = useState("text");
 
-  const activeFields = fields.length > 0 ? fields : DEFAULT_FIELDS;
+  const activeFields = fields.length > 0 ? fields : buildDefaultFields(locale);
   const existingIds = new Set(activeFields.map((f) => f.id));
   const availableShopify = ADDITIONAL_SHOPIFY_FIELDS.filter(
     (f) => !existingIds.has(f.id)
@@ -484,7 +491,7 @@ export function FormBuilder({ fields, onChange, onSave }: Props) {
                     label="Label"
                     value={newFieldLabel}
                     onChange={setNewFieldLabel}
-                    placeholder="e.g. Nume firm\u0103"
+                    placeholder="e.g. Company name"
                     autoComplete="off"
                     size="slim"
                   />
