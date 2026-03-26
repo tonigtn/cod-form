@@ -180,7 +180,7 @@ _EL_LABELS: dict[str, str] = {
     "address_placeholder": "Οδός, αριθμός, διαμ., όροφος",
     "zip": "Ταχ. Κώδικας",
     "email": "Email",
-    "announcement": "",
+    "announcement": "Δωρεάν αποστολή για παραγγελίες άνω των 40€!",
 }
 
 # Country code → locale config
