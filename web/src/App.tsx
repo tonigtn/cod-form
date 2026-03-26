@@ -99,6 +99,8 @@ function AppContent() {
         <StoreProvider>
           <Routes>
             <Route index element={<Dashboard />} />
+            <Route path="admin" element={<Dashboard />} />
+            <Route path="admin/*" element={<Dashboard />} />
             <Route path="config" element={<Config />} />
             <Route path="orders" element={<Orders />} />
             <Route path="blacklists" element={<Blacklists />} />
