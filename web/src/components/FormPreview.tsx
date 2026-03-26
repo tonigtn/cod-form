@@ -50,7 +50,7 @@ export function FormPreview({ config, locale }: Props) {
   const shippingRate = config.shipping?.default_rate || "19.99";
 
   return (
-    <div style={{ position: "sticky", top: 16 }}>
+    <div style={{ position: "sticky", top: 16, maxHeight: "calc(100vh - 32px)", overflowY: "auto" }}>
       <div style={{
         fontSize: 11, fontWeight: 600, textTransform: "uppercase" as const,
         letterSpacing: "0.05em", color: "#6d7175", marginBottom: 8,
@@ -101,7 +101,7 @@ export function FormPreview({ config, locale }: Props) {
           boxShadow: "0 2px 16px rgba(0,0,0,0.12)",
           color: fs?.text_color || "#333",
           position: "relative",
-          maxHeight: 500, overflowY: "auto",
+          /* no maxHeight — show full form */
         }}>
           {/* Close button */}
           <div style={{ position: "absolute", top: 10, right: 12, fontSize: 20, color: "#999", cursor: "default", lineHeight: 1 }}>×</div>
