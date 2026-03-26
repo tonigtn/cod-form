@@ -11,10 +11,21 @@ async def get_offers(shop_id: int, product_id: int | None = None) -> list[Quanti
     config = await load_store_config(shop_id)
     result: list[QuantityOffer] = []
 
+    # Check if a product-specific group exists — if so, skip default (empty product_ids)
+    has_specific = False
+    if product_id:
+        has_specific = any(
+            g.enabled and g.product_ids and product_id in g.product_ids
+            for g in config.offer_groups
+        )
+
     for group in config.offer_groups:
         if not group.enabled:
             continue
         if product_id and group.product_ids and product_id not in group.product_ids:
+            continue
+        # Skip default group if product has its own specific group
+        if has_specific and not group.product_ids:
             continue
         for tier in group.tiers:
             result.append(

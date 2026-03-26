@@ -1459,3 +1459,28 @@ select.cod-upsell-page__variant-select {
   font-size: 14px !important;
   font-weight: 600 !important;
 }
+
+/* Field validation errors — must be visible on all themes */
+#cod-form-overlay .cod-form__error {
+  display: block !important;
+  font-size: 13px !important;
+  color: #D32F2F !important;
+  min-height: 18px !important;
+  margin-top: 4px !important;
+  font-weight: 500 !important;
+  line-height: 1.3 !important;
+}
+#cod-form-overlay input.cod-form__input--error,
+#cod-form-overlay select.cod-form__input--error {
+  border-color: #D32F2F !important;
+  box-shadow: 0 0 0 1px #D32F2F !important;
+}
+
+/* Hide error section by default — only JS shows it on actual errors */
+#cod-error { display: none !important; }
+#cod-error[style*="display: block"], #cod-error:not([hidden]):not(:empty) { display: block !important; }
+
+/* Force hide error retry — only inline JS display:block should override */
+#cod-error-box, #cod-error-retry {
+  display: none !important;
+}
