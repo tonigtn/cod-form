@@ -252,7 +252,7 @@ function FormTab({ draft, setDraft, save, locale }: TabProps) {
       />
       <TextField
         label="Free shipping announcement"
-        value={draft.settings?.announcement_text ?? locale?.labels?.announcement ?? ""}
+        value={draft.settings?.announcement_text || locale?.labels?.announcement || ""}
         onChange={(v) =>
           setDraft((d) => ({
             ...d,
