@@ -1,13 +1,13 @@
 import type { StoreConfig, FormField } from "../api/types";
 
 const DEFAULT_PREVIEW_FIELDS: FormField[] = [
-  { id: "first_name", label: "Prenume", placeholder: "", field_type: "text", visible: true, required: true, order: 0, half_width: false, options: [] },
-  { id: "last_name", label: "Nume", placeholder: "", field_type: "text", visible: true, required: true, order: 1, half_width: false, options: [] },
-  { id: "phone", label: "Telefon", placeholder: "07XX XXX XXX", field_type: "tel", visible: true, required: true, order: 2, half_width: false, options: [] },
-  { id: "province", label: "Jude\u021b", placeholder: "", field_type: "select", visible: true, required: true, order: 3, half_width: false, options: [] },
-  { id: "city", label: "Ora\u0219", placeholder: "", field_type: "text", visible: true, required: true, order: 4, half_width: false, options: [] },
-  { id: "address1", label: "Adres\u0103", placeholder: "Strada, nr., bl., sc., ap.", field_type: "text", visible: true, required: true, order: 5, half_width: false, options: [] },
-  { id: "zip", label: "Cod po\u0219tal", placeholder: "", field_type: "text", visible: false, required: false, order: 6, half_width: false, options: [] },
+  { id: "first_name", label: "First Name", placeholder: "", field_type: "text", visible: true, required: true, order: 0, half_width: false, options: [] },
+  { id: "last_name", label: "Last Name", placeholder: "", field_type: "text", visible: true, required: true, order: 1, half_width: false, options: [] },
+  { id: "phone", label: "Phone", placeholder: "", field_type: "tel", visible: true, required: true, order: 2, half_width: false, options: [] },
+  { id: "province", label: "Province", placeholder: "", field_type: "select", visible: true, required: true, order: 3, half_width: false, options: [] },
+  { id: "city", label: "City", placeholder: "", field_type: "text", visible: true, required: true, order: 4, half_width: false, options: [] },
+  { id: "address1", label: "Address", placeholder: "", field_type: "text", visible: true, required: true, order: 5, half_width: false, options: [] },
+  { id: "zip", label: "Postal Code", placeholder: "", field_type: "text", visible: false, required: false, order: 6, half_width: false, options: [] },
   { id: "email", label: "Email", placeholder: "", field_type: "email", visible: true, required: false, order: 7, half_width: false, options: [] },
 ];
 
@@ -94,7 +94,7 @@ export function FormPreview({ config }: Props) {
             background: "#f9fafb", borderRadius: "12px 12px 0 0",
             borderBottom: "1px solid #e5e7eb",
           }}>
-            Transport gratuit pentru comenzi peste 150 lei!
+            Free shipping announcement
           </div>
 
           {/* Form fields */}
@@ -111,7 +111,7 @@ export function FormPreview({ config }: Props) {
                     borderRadius: 8, background: "#fff", color: "#999",
                     display: "flex", justifyContent: "space-between",
                   }}>
-                    <span>{f.placeholder || "— Selecteaz\u0103 —"}</span>
+                    <span>{f.placeholder || "— Select —"}</span>
                     <span>▾</span>
                   </div>
                 ) : (
@@ -146,7 +146,7 @@ export function FormPreview({ config }: Props) {
                   Numele Produsului
                 </div>
                 <div style={{ display: "flex", gap: 6, alignItems: "center", marginTop: 3 }}>
-                  <span style={{ fontSize: 15, fontWeight: 700, color: accent }}>99,99 RON</span>
+                  <span style={{ fontSize: 15, fontWeight: 700, color: accent }}>99.99</span>
                   <span style={{ fontSize: 13, fontWeight: 600, color: "#e53935", textDecoration: "line-through" }}>149,99 RON</span>
                 </div>
               </div>
@@ -156,18 +156,18 @@ export function FormPreview({ config }: Props) {
             {config.settings?.enable_discount_codes && (
               <div style={{ padding: "10px 0 8px" }}>
                 <div style={{ fontSize: 13, color: accent, textDecoration: "underline", marginBottom: 6, cursor: "default" }}>
-                  Ai un cod de reducere?
+                  Discount code?
                 </div>
                 <div style={{ display: "flex", gap: 6 }}>
                   <div style={{
                     flex: 1, padding: "8px 10px", fontSize: 13,
                     border: "1px solid #ddd", borderRadius: 8, color: "#999",
                     textTransform: "uppercase",
-                  }}>INTRODU CODUL</div>
+                  }}>ENTER CODE</div>
                   <div style={{
                     padding: "8px 12px", fontSize: 13, border: "1px solid #ddd",
                     borderRadius: 8, cursor: "default",
-                  }}>Aplic\u0103</div>
+                  }}>Apply</div>
                 </div>
               </div>
             )}
@@ -175,18 +175,18 @@ export function FormPreview({ config }: Props) {
             {/* Summary lines */}
             <div style={{ fontSize: 14, lineHeight: 2 }}>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span>Subtotal</span><span>99,99 RON</span>
+                <span>Subtotal</span><span>99.99</span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", color: accent }}>
-                <span>Reducere</span><span></span>
+                <span>Discount</span><span></span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span>Transport</span><span>{shippingRate} RON</span>
+                <span>Transport</span><span>{shippingRate}</span>
               </div>
               {config.settings?.cod_fee > 0 && (
                 <div style={{ display: "flex", justifyContent: "space-between" }}>
-                  <span>{config.settings.cod_fee_label || "Tax\u0103 ramburs"}</span>
-                  <span>{config.settings.cod_fee} RON</span>
+                  <span>{config.settings.cod_fee_label || "COD Fee"}</span>
+                  <span>{config.settings.cod_fee}</span>
                 </div>
               )}
               <div style={{
@@ -195,7 +195,7 @@ export function FormPreview({ config }: Props) {
                 paddingTop: 6, marginTop: 4,
               }}>
                 <span>Total</span>
-                <span>{(99.99 + parseFloat(shippingRate)).toFixed(2)} RON</span>
+                <span>{(99.99 + parseFloat(shippingRate)).toFixed(2)}</span>
               </div>
             </div>
           </div>
@@ -204,7 +204,7 @@ export function FormPreview({ config }: Props) {
           {config.bumps?.enabled && config.bumps.items?.length > 0 && (
             <div style={{ marginTop: 14 }}>
               <div style={{ textAlign: "center", fontSize: 14, fontWeight: 600, marginBottom: 8 }}>
-                ⬇️ Oferte promo\u021bionale ⬇️
+                ⬇️ Add-ons ⬇️
               </div>
               {config.bumps.items.slice(0, 3).map((bump, i) => (
                 <div key={i} style={{
@@ -239,8 +239,8 @@ export function FormPreview({ config }: Props) {
             background: accent, border: "none",
             borderRadius: 8, cursor: "default", fontFamily: "inherit",
           }}>
-            <span>Plaseaz\u0103 comanda</span>
-            <span style={{ fontSize: 10, textTransform: "uppercase", opacity: 0.85, marginTop: 2 }}>PLATA LA LIVRARE</span>
+            <span>{config.form.button_text || "Place Order"}</span>
+            <span style={{ fontSize: 10, textTransform: "uppercase", opacity: 0.85, marginTop: 2 }}>CASH ON DELIVERY</span>
           </button>
 
           {/* Prepaid button */}
