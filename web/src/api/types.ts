@@ -167,6 +167,7 @@ export interface SettingsConfig {
   restrict_mode: string;
   allowed_product_ids: number[];
   excluded_product_ids: number[];
+  announcement_text?: string;
 }
 
 export interface PrepaidConfig {

@@ -116,8 +116,17 @@ async def form_config_endpoint(
     locale = await get_shop_locale(shop)
     layout_fields = [f.model_dump() for f in config.form.layout.fields]
 
+    # Override announcement from per-store settings if set
+    announcement = config.settings.announcement_text if hasattr(config.settings, 'announcement_text') and config.settings.announcement_text else None
+    if not announcement:
+        labels = locale.get("labels", {})
+        announcement = labels.get("announcement", "") if isinstance(labels, dict) else ""
+    locale_copy = dict(locale)
+    if isinstance(locale_copy.get("labels"), dict):
+        locale_copy["labels"] = {**locale_copy["labels"], "announcement": announcement}
+
     return {
-        "locale": locale,
+        "locale": locale_copy,
         "button_style": config.button_style.model_dump(),
         "form_style": config.form_style.model_dump(),
         "form": {

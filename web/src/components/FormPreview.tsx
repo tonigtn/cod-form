@@ -113,7 +113,7 @@ export function FormPreview({ config, locale }: Props) {
             background: "#f9fafb", borderRadius: "12px 12px 0 0",
             borderBottom: "1px solid #e5e7eb",
           }}>
-            {L.announcement || "Free shipping announcement"}
+            {config.settings?.announcement_text || L.announcement || "Free shipping announcement"}
           </div>
 
           {/* Form fields */}

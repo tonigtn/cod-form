@@ -251,6 +251,18 @@ function FormTab({ draft, setDraft, save, locale }: TabProps) {
         autoComplete="off"
       />
       <TextField
+        label="Free shipping announcement"
+        value={draft.settings?.announcement_text ?? locale?.labels?.announcement ?? ""}
+        onChange={(v) =>
+          setDraft((d) => ({
+            ...d,
+            settings: { ...d.settings, announcement_text: v },
+          }))
+        }
+        autoComplete="off"
+        helpText="Shown at the top of the form. Leave empty to hide."
+      />
+      <TextField
         label="Order note prefix"
         value={draft.form.custom_note_prefix}
         onChange={(v) =>

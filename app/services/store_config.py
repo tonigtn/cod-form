@@ -195,6 +195,7 @@ class CodSettingsConfig(BaseModel, frozen=True):
     restrict_mode: str = "all"
     allowed_product_ids: list[int] = Field(default_factory=list)
     excluded_product_ids: list[int] = Field(default_factory=list)
+    announcement_text: str = ""
 
 
 class CodOffersStyle(BaseModel, frozen=True):
