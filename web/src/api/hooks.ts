@@ -29,6 +29,24 @@ export function useStoreConfig(shop: string) {
   });
 }
 
+export interface StoreLocale {
+  language: string;
+  country_code: string;
+  currency: string;
+  phone_placeholder: string;
+  provinces: string[];
+  labels: Record<string, string>;
+}
+
+export function useStoreLocale(shop: string) {
+  return useQuery({
+    queryKey: ["locale", shop],
+    queryFn: () => apiFetch<{ locale: StoreLocale }>("/config/locale"),
+    enabled: !!shop,
+    staleTime: Infinity,
+  });
+}
+
 export function useUpdateConfigSection(_shop: string) {
   const qc = useQueryClient();
   return useMutation({

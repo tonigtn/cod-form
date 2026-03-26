@@ -1,28 +1,47 @@
 import type { StoreConfig, FormField } from "../api/types";
+import type { StoreLocale } from "../api/hooks";
 
-const DEFAULT_PREVIEW_FIELDS: FormField[] = [
-  { id: "first_name", label: "First Name", placeholder: "", field_type: "text", visible: true, required: true, order: 0, half_width: false, options: [] },
-  { id: "last_name", label: "Last Name", placeholder: "", field_type: "text", visible: true, required: true, order: 1, half_width: false, options: [] },
-  { id: "phone", label: "Phone", placeholder: "", field_type: "tel", visible: true, required: true, order: 2, half_width: false, options: [] },
-  { id: "province", label: "Province", placeholder: "", field_type: "select", visible: true, required: true, order: 3, half_width: false, options: [] },
-  { id: "city", label: "City", placeholder: "", field_type: "text", visible: true, required: true, order: 4, half_width: false, options: [] },
-  { id: "address1", label: "Address", placeholder: "", field_type: "text", visible: true, required: true, order: 5, half_width: false, options: [] },
-  { id: "zip", label: "Postal Code", placeholder: "", field_type: "text", visible: false, required: false, order: 6, half_width: false, options: [] },
-  { id: "email", label: "Email", placeholder: "", field_type: "email", visible: true, required: false, order: 7, half_width: false, options: [] },
-];
+// Label keys map field IDs to locale label keys
+
+const FALLBACK_LABELS: Record<string, string> = {
+  first_name: "First Name",
+  last_name: "Last Name",
+  phone: "Phone",
+  province: "Province",
+  city: "City",
+  address1: "Address",
+  zip: "Postal Code",
+  email: "Email",
+};
+
+function getDefaultFields(locale?: StoreLocale): FormField[] {
+  const labels = locale?.labels || {};
+  return [
+    { id: "first_name", label: labels.first_name || FALLBACK_LABELS.first_name!, placeholder: locale?.phone_placeholder || "", field_type: "text", visible: true, required: true, order: 0, half_width: false, options: [] },
+    { id: "last_name", label: labels.last_name || FALLBACK_LABELS.last_name!, placeholder: "", field_type: "text", visible: true, required: true, order: 1, half_width: false, options: [] },
+    { id: "phone", label: labels.phone || FALLBACK_LABELS.phone!, placeholder: locale?.phone_placeholder || "", field_type: "tel", visible: true, required: true, order: 2, half_width: false, options: [] },
+    { id: "province", label: labels.province || FALLBACK_LABELS.province!, placeholder: "", field_type: "select", visible: true, required: true, order: 3, half_width: false, options: [] },
+    { id: "city", label: labels.city || FALLBACK_LABELS.city!, placeholder: "", field_type: "text", visible: true, required: true, order: 4, half_width: false, options: [] },
+    { id: "address1", label: labels.address || FALLBACK_LABELS.address1!, placeholder: labels.address_placeholder || "", field_type: "text", visible: true, required: true, order: 5, half_width: false, options: [] },
+    { id: "zip", label: labels.zip || FALLBACK_LABELS.zip!, placeholder: "", field_type: "text", visible: false, required: false, order: 6, half_width: false, options: [] },
+    { id: "email", label: labels.email || FALLBACK_LABELS.email!, placeholder: "", field_type: "email", visible: true, required: false, order: 7, half_width: false, options: [] },
+  ];
+}
 
 interface Props {
   config: StoreConfig;
+  locale?: StoreLocale;
 }
 
-export function FormPreview({ config }: Props) {
+export function FormPreview({ config, locale }: Props) {
   const bs = config.button_style;
   const fs = config.form_style;
   const pp = config.prepaid;
 
+  const L = locale?.labels || {};
   const rawFields = config.form.layout?.fields?.length
     ? config.form.layout.fields
-    : DEFAULT_PREVIEW_FIELDS;
+    : getDefaultFields(locale);
   const fields = [...rawFields]
     .filter((f) => f.visible)
     .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
@@ -94,7 +113,7 @@ export function FormPreview({ config }: Props) {
             background: "#f9fafb", borderRadius: "12px 12px 0 0",
             borderBottom: "1px solid #e5e7eb",
           }}>
-            Free shipping announcement
+            {L.announcement || "Free shipping announcement"}
           </div>
 
           {/* Form fields */}
@@ -111,7 +130,7 @@ export function FormPreview({ config }: Props) {
                     borderRadius: 8, background: "#fff", color: "#999",
                     display: "flex", justifyContent: "space-between",
                   }}>
-                    <span>{f.placeholder || "— Select —"}</span>
+                    <span>{f.placeholder || L.select_province || "— Select —"}</span>
                     <span>▾</span>
                   </div>
                 ) : (
@@ -156,18 +175,18 @@ export function FormPreview({ config }: Props) {
             {config.settings?.enable_discount_codes && (
               <div style={{ padding: "10px 0 8px" }}>
                 <div style={{ fontSize: 13, color: accent, textDecoration: "underline", marginBottom: 6, cursor: "default" }}>
-                  Discount code?
+                  {L.have_discount || "Discount code?"}
                 </div>
                 <div style={{ display: "flex", gap: 6 }}>
                   <div style={{
                     flex: 1, padding: "8px 10px", fontSize: 13,
                     border: "1px solid #ddd", borderRadius: 8, color: "#999",
                     textTransform: "uppercase",
-                  }}>ENTER CODE</div>
+                  }}>{L.enter_code?.toUpperCase() || "ENTER CODE"}</div>
                   <div style={{
                     padding: "8px 12px", fontSize: 13, border: "1px solid #ddd",
                     borderRadius: 8, cursor: "default",
-                  }}>Apply</div>
+                  }}>{L.apply || "Apply"}</div>
                 </div>
               </div>
             )}
@@ -175,13 +194,13 @@ export function FormPreview({ config }: Props) {
             {/* Summary lines */}
             <div style={{ fontSize: 14, lineHeight: 2 }}>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span>Subtotal</span><span>99.99</span>
+                <span>{L.subtotal || "Subtotal"}</span><span>99.99</span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", color: accent }}>
-                <span>Discount</span><span></span>
+                <span>{L.discount || "Discount"}</span><span></span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span>Transport</span><span>{shippingRate}</span>
+                <span>{L.shipping || "Shipping"}</span><span>{shippingRate}</span>
               </div>
               {config.settings?.cod_fee > 0 && (
                 <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -194,7 +213,7 @@ export function FormPreview({ config }: Props) {
                 fontWeight: 700, fontSize: 16, borderTop: "2px solid #eee",
                 paddingTop: 6, marginTop: 4,
               }}>
-                <span>Total</span>
+                <span>{L.total || "Total"}</span>
                 <span>{(99.99 + parseFloat(shippingRate)).toFixed(2)}</span>
               </div>
             </div>
@@ -204,7 +223,7 @@ export function FormPreview({ config }: Props) {
           {config.bumps?.enabled && config.bumps.items?.length > 0 && (
             <div style={{ marginTop: 14 }}>
               <div style={{ textAlign: "center", fontSize: 14, fontWeight: 600, marginBottom: 8 }}>
-                ⬇️ Add-ons ⬇️
+                {L.bumps_heading || "⬇️ Add-ons ⬇️"}
               </div>
               {config.bumps.items.slice(0, 3).map((bump, i) => (
                 <div key={i} style={{
@@ -239,8 +258,8 @@ export function FormPreview({ config }: Props) {
             background: accent, border: "none",
             borderRadius: 8, cursor: "default", fontFamily: "inherit",
           }}>
-            <span>{config.form.button_text || "Place Order"}</span>
-            <span style={{ fontSize: 10, textTransform: "uppercase", opacity: 0.85, marginTop: 2 }}>CASH ON DELIVERY</span>
+            <span>{L.submit || config.form.button_text || "Place Order"}</span>
+            <span style={{ fontSize: 10, textTransform: "uppercase", opacity: 0.85, marginTop: 2 }}>{L.submit_subtitle || "CASH ON DELIVERY"}</span>
           </button>
 
           {/* Prepaid button */}

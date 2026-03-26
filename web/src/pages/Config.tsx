@@ -17,7 +17,7 @@ import {
   RangeSlider,
   Divider,
 } from "@shopify/polaris";
-import { useStoreConfig, useUpdateConfigSection, useProducts } from "../api/hooks";
+import { useStoreConfig, useUpdateConfigSection, useProducts, useStoreLocale } from "../api/hooks";
 import { useStore } from "../context/StoreContext";
 import { OwnerStoreSelector } from "../components/StoreSelector";
 import { FormBuilder, DEFAULT_FIELDS } from "../components/FormBuilder";
@@ -30,6 +30,7 @@ export function Config() {
   const { storeId } = useStore(); // scoped to session store
   const [tabIndex, setTabIndex] = useState(0);
   const { data: config, isLoading } = useStoreConfig(storeId);
+  const { data: localeData } = useStoreLocale(storeId);
   const updateSection = useUpdateConfigSection(storeId);
   const [draft, setDraftRaw] = useState<StoreConfig | null>(null);
 
@@ -133,7 +134,7 @@ export function Config() {
             </div>
             {tabIndex <= 1 && (
               <div style={{ flexShrink: 0 }}>
-                <FormPreview config={draft} />
+                <FormPreview config={draft} locale={localeData?.locale} />
               </div>
             )}
             {tabIndex === 5 && (

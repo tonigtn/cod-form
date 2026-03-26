@@ -46,3 +46,12 @@ async def update_current_config_section(
     await update_config_section(shop_id, section, body)
     log.info("cod_admin_config_updated", shop=_user["shop"], section=section)
     return {"status": "ok"}
+
+
+@router.get("/locale")
+async def get_store_locale(_user: SessionUser) -> dict[str, object]:
+    """Return the store's locale labels for preview rendering."""
+    from app.services.locale import get_shop_locale
+
+    locale = await get_shop_locale(_user["shop"])
+    return {"locale": locale}
