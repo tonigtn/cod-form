@@ -162,7 +162,7 @@ export function FormPreview({ config, locale }: Props) {
               }}>IMG</div>
               <div>
                 <div style={{ fontSize: 14, fontWeight: 600, color: fs?.header_text_color || "#111", lineHeight: 1.3 }}>
-                  Product Name
+                  Numele Produsului
                 </div>
                 <div style={{ display: "flex", gap: 6, alignItems: "center", marginTop: 3 }}>
                   <span style={{ fontSize: 15, fontWeight: 700, color: accent }}>99.99</span>
@@ -239,7 +239,7 @@ export function FormPreview({ config, locale }: Props) {
                   {bump.image_url && (
                     <img src={bump.image_url} alt="" style={{ width: 40, height: 40, borderRadius: 6, objectFit: "cover" }} />
                   )}
-                  <span dangerouslySetInnerHTML={{ __html: bump.text || bump.title || "Bump product" }} />
+                  <span dangerouslySetInnerHTML={{ __html: bump.text || bump.title || "Produs bump" }} />
                 </div>
               ))}
               {config.bumps.items.length > 3 && (
