@@ -67,6 +67,22 @@ export function useUpdateConfigSection(_shop: string) {
   });
 }
 
+// ─── Theme Embed ───────────────────────────────────────────────────────────
+
+export interface ThemeEmbedStatus {
+  enabled: boolean;
+  theme_id: number;
+}
+
+export function useThemeEmbedStatus(shop: string) {
+  return useQuery({
+    queryKey: ["theme-embed", shop],
+    queryFn: () => apiFetch<ThemeEmbedStatus>("/config/theme-embed-status"),
+    enabled: !!shop,
+    staleTime: 60_000,
+  });
+}
+
 // ─── Orders ─────────────────────────────────────────────────────────────────
 
 export function useOrders(

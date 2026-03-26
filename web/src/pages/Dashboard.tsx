@@ -11,7 +11,10 @@ import {
   Badge,
   InlineStack,
   Spinner,
+  Button,
+  Icon,
 } from "@shopify/polaris";
+import { AppsIcon } from "@shopify/polaris-icons";
 import {
   LineChart,
   Line,
@@ -21,7 +24,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { useAnalytics, useOrders } from "../api/hooks";
+import { useAnalytics, useOrders, useThemeEmbedStatus } from "../api/hooks";
 import { useStore } from "../context/StoreContext";
 import { OwnerStoreSelector } from "../components/StoreSelector";
 import { StatCard } from "../components/StatCard";
@@ -34,7 +37,7 @@ const PERIOD_OPTIONS = [
 ];
 
 export function Dashboard() {
-  const { storeId, currency } = useStore();
+  const { shop, storeId, currency } = useStore();
   const [days, setDays] = useState("7");
 
   const { data: analytics, isLoading: analyticsLoading } = useAnalytics(
@@ -42,10 +45,37 @@ export function Dashboard() {
     Number(days)
   );
   const { data: orders, isLoading: ordersLoading } = useOrders(storeId, 1, 5);
+  const { data: embedStatus } = useThemeEmbedStatus(storeId);
+
+  const openThemeEditor = () => {
+    if (!embedStatus?.theme_id) return;
+    const url = `https://${shop}/admin/themes/${embedStatus.theme_id}/editor?context=apps`;
+    window.open(url, "_top");
+  };
 
   return (
     <Page title="Dashboard">
       <Layout>
+        {/* Theme App Embed */}
+        {embedStatus && (
+          <Layout.Section>
+            <Card>
+              <InlineStack align="space-between" blockAlign="center">
+                <InlineStack gap="300" blockAlign="center">
+                  <Icon source={AppsIcon} tone="base" />
+                  <Text as="span" variant="bodyMd" fontWeight="semibold">
+                    Theme App Embed
+                  </Text>
+                  <Badge tone={embedStatus.enabled ? "success" : "critical"}>
+                    {embedStatus.enabled ? "ON" : "OFF"}
+                  </Badge>
+                </InlineStack>
+                <Button onClick={openThemeEditor}>Open Theme</Button>
+              </InlineStack>
+            </Card>
+          </Layout.Section>
+        )}
+
         {/* Controls */}
         <Layout.Section>
           <InlineGrid columns={2} gap="400">

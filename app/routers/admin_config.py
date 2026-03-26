@@ -55,3 +55,58 @@ async def get_store_locale(_user: SessionUser) -> dict[str, object]:
 
     locale = await get_shop_locale(_user["shop"])
     return {"locale": locale}
+
+
+@router.get("/theme-embed-status")
+async def theme_embed_status(_user: SessionUser) -> dict[str, Any]:
+    """Check if our theme app embed is enabled on the shop's live theme."""
+    import httpx
+
+    from app.shopify.tokens import get_token_or_raise
+
+    shop = _user["shop"]
+    token = await get_token_or_raise(shop)
+    headers = {"X-Shopify-Access-Token": token}
+
+    async with httpx.AsyncClient(timeout=15.0) as client:
+        # Get the main (live) theme
+        resp = await client.get(
+            f"https://{shop}/admin/api/2025-01/themes.json",
+            headers=headers,
+        )
+        resp.raise_for_status()
+        themes = resp.json().get("themes", [])
+        main_theme = next((t for t in themes if t.get("role") == "main"), None)
+        if not main_theme:
+            return {"enabled": False, "theme_id": 0}
+
+        theme_id = main_theme["id"]
+
+        # Read settings_data.json to check app embed status
+        resp = await client.get(
+            f"https://{shop}/admin/api/2025-01/themes/{theme_id}/assets.json",
+            headers=headers,
+            params={"asset[key]": "config/settings_data.json"},
+        )
+        resp.raise_for_status()
+        asset_value = resp.json().get("asset", {}).get("value", "")
+
+    if not asset_value:
+        return {"enabled": False, "theme_id": theme_id}
+
+    import orjson
+
+    settings: dict[str, Any] = orjson.loads(asset_value)
+    current = settings.get("current", {})
+    blocks: dict[str, Any] = current.get("blocks", {})
+
+    # Look for our extension block — match by UID from shopify.extension.toml
+    extension_uid = "279c058d-e2b0-785d-0abc-9c4482a708772fe4d69a"
+    enabled = False
+    for block in blocks.values():
+        block_type = block.get("type", "")
+        if extension_uid in block_type:
+            enabled = not block.get("disabled", False)
+            break
+
+    return {"enabled": enabled, "theme_id": theme_id}
