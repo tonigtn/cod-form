@@ -554,8 +554,9 @@
     var inactiveBd = os.inactive_border || '#e0e0e0';
     var lblBg = os.label_bg || activeBd;
 
-    var galImg = document.querySelector('[data-gallery-main] img, .product-gallery__main img');
+    var galImg = document.querySelector('[data-gallery-main] img, .product-gallery__main img, .product__media img, .product-single__photo img');
     var defImg = galImg ? galImg.getAttribute('src') : '';
+    if (!defImg && script) defImg = script.getAttribute('data-product-image') || '';
 
     var allOffers = [{ min_qty: 1, title: '', discount_type: 'none', discount_percent: 0, discount_fixed: 0, tag: '', tag_bg: '', label: '', image_url: defImg }].concat(offers);
 

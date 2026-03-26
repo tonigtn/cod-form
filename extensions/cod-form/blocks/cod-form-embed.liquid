@@ -78,11 +78,10 @@
         
           <span class="cod-form__error" data-error="email"></span></div>
 
-        {%- comment -%} In-form quantity offers (populated by JS) {%- endcomment -%}
-        <div class="cod-form-offers" id="cod-form-offers" hidden></div>
-
         {%- comment -%} Product + Discount + Summary — one bordered card like BebeMate {%- endcomment -%}
         <div class="cod-form__summary">
+          {%- comment -%} In-form quantity offers (replaces product header when active) {%- endcomment -%}
+          <div class="cod-form-offers" id="cod-form-offers" hidden></div>
           <div class="cod-form__header" id="cod-form-header">
             <img class="cod-form__product-img" id="cod-product-img" src="{{ product.featured_image | image_url: width: 160 }}" alt="{{ product.title | escape }}" width="80" height="80">
             <div class="cod-form__product-info">
@@ -175,6 +174,10 @@
   data-currency="{{ cart.currency.iso_code }}"
   data-product-title="{{ product.title | escape }}"
   data-product-image="{{ product.featured_image | image_url: width: 160 }}"
+  {% if product.variants.size > 1 %}
+    data-variant-option-name="{{ product.options[0] }}"
+    data-variants='[{% for v in product.variants %}{"t":"{{ v.title | escape }}","p":"{{ v.price | divided_by: 100.0 }}","cp":"{% if v.compare_at_price > v.price %}{{ v.compare_at_price | divided_by: 100.0 }}{% endif %}","img":"{{ v.featured_image.src | default: product.featured_image | image_url: width: 160 }}","ok":{{ v.available }}}{% unless forloop.last %},{% endunless %}{% endfor %}]'
+  {% endif %}
 ></script>
 {% endif %}
 
