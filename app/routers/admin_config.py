@@ -100,13 +100,14 @@ async def theme_embed_status(_user: SessionUser) -> dict[str, Any]:
     current = settings.get("current", {})
     blocks: dict[str, Any] = current.get("blocks", {})
 
-    # Look for our extension block by its block handle "cod-form-embed"
-    # Block types: shopify://apps/<app-handle>/blocks/cod-form-embed/<uuid>
+    # Look for our extension blocks: "cod-form-embed" (per-template) or "app-embed" (global)
+    # Block types: shopify://apps/<app-handle>/blocks/<block-handle>/<uuid>
     enabled = False
     for block in blocks.values():
         block_type = block.get("type", "")
-        if "/blocks/cod-form-embed/" in block_type:
-            enabled = not block.get("disabled", False)
-            break
+        if "/blocks/app-embed/" in block_type or "/blocks/cod-form-embed/" in block_type:
+            if not block.get("disabled", False):
+                enabled = True
+                break
 
     return {"enabled": enabled, "theme_id": theme_id}
