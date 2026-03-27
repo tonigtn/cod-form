@@ -99,7 +99,11 @@ async def _load_blacklist(shop_id: int, bl_type: str) -> set[str]:
 
 
 async def _check_duplicate_phone(phone: str, shop_id: int, config: CodFraudConfig) -> bool:
-    """Check if same phone placed an order within the window."""
+    """Check if same phone placed an order within the window.
+
+    Uses pg_advisory_xact_lock to serialize concurrent requests for the same phone,
+    preventing race conditions where 3 simultaneous clicks all pass the check.
+    """
     if config.duplicate_window_minutes > 0:
         delta = timedelta(minutes=config.duplicate_window_minutes)
     elif config.duplicate_window_hours > 0:
@@ -110,13 +114,18 @@ async def _check_duplicate_phone(phone: str, shop_id: int, config: CodFraudConfi
     cutoff = datetime.now(tz=UTC) - delta
     phone_hash = _hash_phone(phone)
 
-    count = await pool.fetchval(
-        """
-        SELECT COUNT(*) FROM orders
-        WHERE shop_id = $1 AND phone_hash = $2 AND created_at > $3
-        """,
-        shop_id,
-        phone_hash,
-        cutoff,
-    )
-    return bool(count and count > 0)
+    # Use advisory lock keyed on shop_id + phone_hash to serialize concurrent submissions
+    lock_key = hash((shop_id, phone_hash)) & 0x7FFFFFFFFFFFFFFF  # positive int64
+    db = pool.get_pool()
+    async with db.acquire() as conn, conn.transaction():
+        await conn.execute("SELECT pg_advisory_xact_lock($1)", lock_key)
+        count = await conn.fetchval(
+            """
+                SELECT COUNT(*) FROM orders
+                WHERE shop_id = $1 AND phone_hash = $2 AND created_at > $3
+                """,
+            shop_id,
+            phone_hash,
+            cutoff,
+        )
+        return bool(count and count > 0)

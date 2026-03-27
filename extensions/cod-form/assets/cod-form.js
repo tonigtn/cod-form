@@ -1913,9 +1913,12 @@ function renderBumps() {
     fetchUpsells();
   }
 
+  var _submitting = false;
   document.addEventListener('submit', function (e) {
     if (!e.target || e.target.id !== 'cod-order-form') return;
     e.preventDefault();
+    if (_submitting) return;
+    _submitting = true;
 
     // Validation
     clearErrors();
@@ -1945,9 +1948,9 @@ function renderBumps() {
       showFieldError('phone', phoneError);
       valid = false;
     }
-    if (!valid) return;
+    if (!valid) { _submitting = false; return; }
 
-    if (!COD_API) {
+    if (!COD_API) { _submitting = false;
       var errorBox = $('cod-error-box');
       var errorMsg = $('cod-error-msg');
       if (errorBox && errorMsg) { errorBox.hidden = false; errorMsg.textContent = 'COD API URL not configured.'; }
