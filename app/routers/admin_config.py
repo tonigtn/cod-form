@@ -100,12 +100,12 @@ async def theme_embed_status(_user: SessionUser) -> dict[str, Any]:
     current = settings.get("current", {})
     blocks: dict[str, Any] = current.get("blocks", {})
 
-    # Look for our extension block — match by UID from shopify.extension.toml
-    extension_uid = "279c058d-e2b0-785d-0abc-9c4482a708772fe4d69a"
+    # Look for our extension block by its block handle "cod-form-embed"
+    # Block types: shopify://apps/<app-handle>/blocks/cod-form-embed/<uuid>
     enabled = False
     for block in blocks.values():
         block_type = block.get("type", "")
-        if extension_uid in block_type:
+        if "/blocks/cod-form-embed/" in block_type:
             enabled = not block.get("disabled", False)
             break
 
