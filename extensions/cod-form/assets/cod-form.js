@@ -1076,7 +1076,7 @@ function renderBumps() {
       if (textSpan) {
         var subtitleText = labels.submit_subtitle || 'PLATA LA LIVRARE';
         textSpan.innerHTML = '<span>' + labels.submit + '</span>'
-          + '<span style="font-size:0.8rem;text-transform:uppercase;opacity:0.85;margin-top:2px;">' + subtitleText + '</span>';
+          + '<span style="font-size:0.85rem;text-transform:uppercase;opacity:0.85;margin-top:2px;">' + subtitleText + '</span>';
       }
     }
 
