@@ -15,8 +15,7 @@ async def get_offers(shop_id: int, product_id: int | None = None) -> list[Quanti
     has_specific = False
     if product_id:
         has_specific = any(
-            g.enabled and g.product_ids and product_id in g.product_ids
-            for g in config.offer_groups
+            g.enabled and g.product_ids and product_id in g.product_ids for g in config.offer_groups
         )
 
     for group in config.offer_groups:

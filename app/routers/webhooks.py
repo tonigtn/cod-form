@@ -128,9 +128,7 @@ async def customers_redact(request: Request) -> dict[str, bool]:
         log.warning("webhook_customer_redact_no_shop")
         return {"ok": False}
 
-    shop_id = await pool.fetchval(
-        "SELECT id FROM shops WHERE shop_domain = $1", shop
-    )
+    shop_id = await pool.fetchval("SELECT id FROM shops WHERE shop_domain = $1", shop)
     if not shop_id:
         log.warning("webhook_customer_redact_unknown_shop", shop=shop)
         return {"ok": True}  # 200 OK — shop not in our system
@@ -199,9 +197,7 @@ async def shop_redact(request: Request) -> dict[str, bool]:
     invalidate_token(shop)
 
     # Delete shop + all related data (CASCADE)
-    result = await pool.execute(
-        "DELETE FROM shops WHERE shop_domain = $1", shop
-    )
+    result = await pool.execute("DELETE FROM shops WHERE shop_domain = $1", shop)
 
     log.info("webhook_shop_redacted", shop=shop, deleted=result)
     return {"ok": True}

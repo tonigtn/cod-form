@@ -86,7 +86,6 @@ _RO_LABELS: dict[str, str] = {
     "otp_resent": "Cod retrimis!",
     "otp_error": "Nu am putut trimite codul de verificare.",
     "online_payment": "\U0001f4b3 Plată cu cardul",
-    "bumps_heading": "Adaugă la comandă",
     "discount_prefix": "Cod",
     "discount_invalid": "Cod invalid",
     "discount_check_error": "Eroare la verificare",

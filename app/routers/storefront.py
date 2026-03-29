@@ -117,7 +117,11 @@ async def form_config_endpoint(
     layout_fields = [f.model_dump() for f in config.form.layout.fields]
 
     # Override announcement from per-store settings if set
-    announcement = config.settings.announcement_text if hasattr(config.settings, 'announcement_text') and config.settings.announcement_text else None
+    announcement = (
+        config.settings.announcement_text
+        if hasattr(config.settings, "announcement_text") and config.settings.announcement_text
+        else None
+    )
     if not announcement:
         labels = locale.get("labels", {})
         announcement = labels.get("announcement", "") if isinstance(labels, dict) else ""
@@ -334,6 +338,11 @@ async def create_order(req: CodOrderRequest, request: Request) -> CodOrderRespon
                 task.add_done_callback(_background_tasks.discard)
             except Exception:
                 pass
+    else:
+        # Release pending lock so user can retry
+        from app.services.fraud import release_pending_order
+
+        await release_pending_order(req, shop_id)
 
     return result
 

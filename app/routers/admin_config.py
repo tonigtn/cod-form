@@ -105,9 +105,10 @@ async def theme_embed_status(_user: SessionUser) -> dict[str, Any]:
     enabled = False
     for block in blocks.values():
         block_type = block.get("type", "")
-        if "/blocks/app-embed/" in block_type or "/blocks/cod-form-embed/" in block_type:
-            if not block.get("disabled", False):
-                enabled = True
-                break
+        if (
+            "/blocks/app-embed/" in block_type or "/blocks/cod-form-embed/" in block_type
+        ) and not block.get("disabled", False):
+            enabled = True
+            break
 
     return {"enabled": enabled, "theme_id": theme_id}

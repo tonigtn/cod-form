@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
 from datetime import UTC, datetime, timedelta
 
@@ -63,8 +64,9 @@ async def log_order(
     order_id: int,
     shop_id: int,
 ) -> None:
-    """Log order to DB for fraud analysis."""
+    """Log order to DB for fraud analysis and release the pending lock."""
     phone = _normalize_phone(req.phone)
+    phone_hash = _hash_phone(phone)
     try:
         await pool.execute(
             """
@@ -75,7 +77,7 @@ async def log_order(
             shop_id,
             order_id,
             order_name,
-            _hash_phone(phone),
+            phone_hash,
             phone[-4:],
             req.city,
             req.province,
@@ -86,6 +88,24 @@ async def log_order(
         )
     except Exception as exc:
         log.error("cod_order_log_error", error=str(exc))
+    # Release pending lock — allow future orders from this phone
+    with contextlib.suppress(Exception):
+        await pool.execute(
+            "DELETE FROM pending_orders WHERE shop_id = $1 AND phone_hash = $2",
+            shop_id,
+            phone_hash,
+        )
+
+
+async def release_pending_order(req: CodOrderRequest, shop_id: int) -> None:
+    """Release pending lock on failure (order not created)."""
+    phone = _normalize_phone(req.phone)
+    with contextlib.suppress(Exception):
+        await pool.execute(
+            "DELETE FROM pending_orders WHERE shop_id = $1 AND phone_hash = $2",
+            shop_id,
+            _hash_phone(phone),
+        )
 
 
 async def _load_blacklist(shop_id: int, bl_type: str) -> set[str]:
@@ -101,8 +121,9 @@ async def _load_blacklist(shop_id: int, bl_type: str) -> set[str]:
 async def _check_duplicate_phone(phone: str, shop_id: int, config: CodFraudConfig) -> bool:
     """Check if same phone placed an order within the window.
 
-    Uses pg_advisory_xact_lock to serialize concurrent requests for the same phone,
-    preventing race conditions where 3 simultaneous clicks all pass the check.
+    Uses a pending_orders table with UNIQUE constraint to prevent concurrent
+    duplicate submissions. INSERT-or-conflict approach: the first request inserts
+    a pending record; concurrent requests hit the UNIQUE constraint and are rejected.
     """
     if config.duplicate_window_minutes > 0:
         delta = timedelta(minutes=config.duplicate_window_minutes)
@@ -114,18 +135,31 @@ async def _check_duplicate_phone(phone: str, shop_id: int, config: CodFraudConfi
     cutoff = datetime.now(tz=UTC) - delta
     phone_hash = _hash_phone(phone)
 
-    # Use advisory lock keyed on shop_id + phone_hash to serialize concurrent submissions
-    lock_key = hash((shop_id, phone_hash)) & 0x7FFFFFFFFFFFFFFF  # positive int64
-    db = pool.get_pool()
-    async with db.acquire() as conn, conn.transaction():
-        await conn.execute("SELECT pg_advisory_xact_lock($1)", lock_key)
-        count = await conn.fetchval(
+    # Check existing completed orders
+    count = await pool.fetchval(
+        """
+        SELECT COUNT(*) FROM orders
+        WHERE shop_id = $1 AND phone_hash = $2 AND created_at > $3
+        """,
+        shop_id,
+        phone_hash,
+        cutoff,
+    )
+    if count and count > 0:
+        return True
+
+    # Try to claim this phone+shop slot with a pending record.
+    # If another concurrent request already claimed it, this INSERT fails
+    # due to the UNIQUE constraint → duplicate detected.
+    try:
+        await pool.execute(
             """
-                SELECT COUNT(*) FROM orders
-                WHERE shop_id = $1 AND phone_hash = $2 AND created_at > $3
-                """,
+            INSERT INTO pending_orders (shop_id, phone_hash, created_at)
+            VALUES ($1, $2, NOW())
+            """,
             shop_id,
             phone_hash,
-            cutoff,
         )
-        return bool(count and count > 0)
+        return False  # Successfully claimed — not a duplicate
+    except Exception:
+        return True  # Conflict — another request is processing this phone
