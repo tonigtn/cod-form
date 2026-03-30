@@ -81,11 +81,10 @@
 
         </div>{%- comment -%} /.cod-form__fields {%- endcomment -%}
 
-        {%- comment -%} Multi-product cart list (populated by JS) {%- endcomment -%}
-        <div id="cod-cart-list" hidden></div>
-
         {%- comment -%} Product + Discount + Summary — one bordered card like BebeMate {%- endcomment -%}
         <div class="cod-form__summary">
+          {%- comment -%} Multi-product cart list (replaces single product header when cart has items) {%- endcomment -%}
+          <div id="cod-cart-list" hidden></div>
           {%- comment -%} In-form quantity offers (replaces product header when active) {%- endcomment -%}
           <div class="cod-form-offers" id="cod-form-offers" hidden></div>
           <div class="cod-form__header" id="cod-form-header">

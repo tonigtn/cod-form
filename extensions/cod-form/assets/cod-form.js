@@ -1659,11 +1659,15 @@ function renderBumps() {
     var container = $('cod-cart-list');
     if (!container) return;
     var items = codCart.getAll();
+    var header = $('cod-form-header');
     if (items.length === 0) {
       container.hidden = true;
+      if (header) header.style.display = '';
       return;
     }
     container.hidden = false;
+    // Hide the single product header — cart list replaces it
+    if (header) header.style.display = 'none';
     var html = '<div class="cod-cart__heading">' + (L.order_prefix || 'Order') + ' (' + codCart.count() + ' ' + (L.quantity_unit || 'items') + ')</div>';
     for (var i = 0; i < items.length; i++) {
       var item = items[i];
