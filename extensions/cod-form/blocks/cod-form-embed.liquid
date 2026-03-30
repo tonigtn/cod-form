@@ -28,25 +28,26 @@
 
       <form id="cod-order-form" novalidate>
         {%- comment -%} Fields (labels come from locale config via JS) {%- endcomment -%}
-        <div class="cod-form__field" data-field="first_name">
+        <div class="cod-form__fields">
+        <div class="cod-form__field" data-field-id="first_name">
           <label for="cod-first-name">{{ 'sections.cod_form.first_name' | t }} <span class="cod-required">*</span></label>
           <input type="text" id="cod-first-name" name="first_name" required autocomplete="given-name">
         
           <span class="cod-form__error" data-error="first_name"></span></div>
 
-        <div class="cod-form__field" data-field="last_name">
+        <div class="cod-form__field" data-field-id="last_name">
           <label for="cod-last-name">{{ 'sections.cod_form.last_name' | t }} <span class="cod-required">*</span></label>
           <input type="text" id="cod-last-name" name="last_name" required autocomplete="family-name">
         
           <span class="cod-form__error" data-error="last_name"></span></div>
 
-        <div class="cod-form__field" data-field="phone">
+        <div class="cod-form__field" data-field-id="phone">
           <label for="cod-phone">{{ 'sections.cod_form.phone' | t }} <span class="cod-required">*</span></label>
           <input type="tel" id="cod-phone" name="phone" required autocomplete="tel">
         
           <span class="cod-form__error" data-error="phone"></span></div>
 
-        <div class="cod-form__field" data-field="province">
+        <div class="cod-form__field" data-field-id="province">
           <label for="cod-province">{{ 'sections.cod_form.province' | t }} <span class="cod-required">*</span></label>
           <select id="cod-province" name="province" required>
             <option value="">{{ 'sections.cod_form.select_province' | t }}</option>
@@ -54,29 +55,31 @@
         
           <span class="cod-form__error" data-error="province"></span></div>
 
-        <div class="cod-form__field" data-field="city">
+        <div class="cod-form__field" data-field-id="city">
           <label for="cod-city">{{ 'sections.cod_form.city' | t }} <span class="cod-required">*</span></label>
           <input type="text" id="cod-city" name="city" required autocomplete="address-level2">
         
           <span class="cod-form__error" data-error="city"></span></div>
 
-        <div class="cod-form__field" data-field="address1">
+        <div class="cod-form__field" data-field-id="address1">
           <label for="cod-address">{{ 'sections.cod_form.address' | t }} <span class="cod-required">*</span></label>
           <input type="text" id="cod-address" name="address1" required autocomplete="street-address" placeholder="{{ 'sections.cod_form.address_placeholder' | t }}">
         
           <span class="cod-form__error" data-error="address1"></span></div>
 
-        <div class="cod-form__field" data-field="zip">
+        <div class="cod-form__field" data-field-id="zip">
           <label for="cod-zip">{{ 'sections.cod_form.zip' | t }}</label>
           <input type="text" id="cod-zip" name="zip" autocomplete="postal-code">
         
           <span class="cod-form__error" data-error="zip"></span></div>
 
-        <div class="cod-form__field" data-field="email">
+        <div class="cod-form__field" data-field-id="email">
           <label for="cod-email">{{ 'sections.cod_form.email' | t }}</label>
           <input type="email" id="cod-email" name="email" autocomplete="email">
         
           <span class="cod-form__error" data-error="email"></span></div>
+
+        </div>{%- comment -%} /.cod-form__fields {%- endcomment -%}
 
         {%- comment -%} Product + Discount + Summary — one bordered card like BebeMate {%- endcomment -%}
         <div class="cod-form__summary">
