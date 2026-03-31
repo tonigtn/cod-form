@@ -242,6 +242,17 @@ class CodPrepaidConfig(BaseModel, frozen=True):
     discount_label: str = ""
 
 
+class CodAutoDiscount(BaseModel, frozen=True):
+    product_id: int
+    discount_amount: float
+    label: str = ""
+
+
+class CodAutoDiscountsConfig(BaseModel, frozen=True):
+    enabled: bool = False
+    discounts: list[CodAutoDiscount] = Field(default_factory=list)
+
+
 class CodStoreConfig(BaseModel, frozen=True):
     """Root config for a single shop's COD form."""
 
@@ -258,6 +269,7 @@ class CodStoreConfig(BaseModel, frozen=True):
     form_style: CodFormStyle = Field(default_factory=CodFormStyle)
     prepaid: CodPrepaidConfig = Field(default_factory=CodPrepaidConfig)
     offers_style: CodOffersStyle = Field(default_factory=CodOffersStyle)
+    auto_discounts: CodAutoDiscountsConfig = Field(default_factory=CodAutoDiscountsConfig)
 
 
 # ── Section name → model mapping ──────────────────────────────────────────
@@ -275,6 +287,7 @@ _SECTION_MODELS: dict[str, type[BaseModel]] = {
     "form_style": CodFormStyle,
     "prepaid": CodPrepaidConfig,
     "offers_style": CodOffersStyle,
+    "auto_discounts": CodAutoDiscountsConfig,
 }
 
 VALID_SECTIONS = frozenset(_SECTION_MODELS.keys()) | {"offer_groups"}

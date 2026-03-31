@@ -166,6 +166,7 @@ async def form_config_endpoint(
         },
         "prepaid": config.prepaid.model_dump(),
         "offers_style": config.offers_style.model_dump(),
+        "auto_discounts": [d.model_dump() for d in config.auto_discounts.discounts] if config.auto_discounts.enabled else [],
         "pixels": {
             "event_matrix": config.pixels.event_matrix,
             "fb_access_token": bool(config.pixels.fb_access_token),

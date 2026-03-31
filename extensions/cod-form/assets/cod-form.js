@@ -275,6 +275,27 @@
       }
     }
 
+    // Auto-discount for specific products (from store config)
+    var autoDiscount = 0;
+    var autoLabel = '';
+    if (formConfig && formConfig.auto_discounts) {
+      for (var ai = 0; ai < formConfig.auto_discounts.length; ai++) {
+        var ad = formConfig.auto_discounts[ai];
+        if (ad.product_id === currentProductId) {
+          autoDiscount = (ad.discount_amount || 0) * quantity;
+          autoLabel = ad.label || '';
+          break;
+        }
+      }
+    }
+
+    var bestDiscount = Math.max(offerDiscount, codeDiscount);
+    var totalDiscount = bestDiscount + autoDiscount;
+    if (totalDiscount > 0) {
+      var source = autoDiscount > 0 && bestDiscount === 0 ? 'auto' : (offerDiscount >= codeDiscount ? 'offer' : 'code');
+      var label = autoLabel || (offerDiscount >= codeDiscount ? (activeOffer ? activeOffer.label : '') : discountCode);
+      return { amount: totalDiscount, source: source, label: label };
+    }
     if (offerDiscount >= codeDiscount) {
       return { amount: offerDiscount, source: 'offer', label: activeOffer ? activeOffer.label : '' };
     }

@@ -94,6 +94,14 @@ async def create_cod_order(req: CodOrderRequest, shop_id: int) -> CodOrderRespon
             discount_pct=offer.discount_percent,
         )
 
+    # Check auto-discounts for this product
+    auto_discount_amount = 0.0
+    if config.auto_discounts.enabled:
+        for ad in config.auto_discounts.discounts:
+            if ad.product_id == req.product_id:
+                auto_discount_amount = ad.discount_amount
+                break
+
     # Build line items
     all_line_items: list[dict[str, object]] = []
     if req.variant_ids:
@@ -109,6 +117,12 @@ async def create_cod_order(req: CodOrderRequest, shop_id: int) -> CodOrderRespon
                     "value": float(offer.discount_percent),
                     "valueType": "PERCENTAGE",
                 }
+            elif auto_discount_amount > 0:
+                li["appliedDiscount"] = {
+                    "title": "Reducere automată",
+                    "value": auto_discount_amount,
+                    "valueType": "FIXED_AMOUNT",
+                }
             all_line_items.append(li)
     else:
         line_item: dict[str, object] = {
@@ -120,6 +134,12 @@ async def create_cod_order(req: CodOrderRequest, shop_id: int) -> CodOrderRespon
                 "title": discount_title,
                 "value": float(offer.discount_percent),
                 "valueType": "PERCENTAGE",
+            }
+        elif auto_discount_amount > 0:
+            line_item["appliedDiscount"] = {
+                "title": "Reducere automată",
+                "value": auto_discount_amount,
+                "valueType": "FIXED_AMOUNT",
             }
         all_line_items.append(line_item)
 
