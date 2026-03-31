@@ -1688,30 +1688,62 @@ select.cod-upsell-page__variant-select {
   margin: 0 0 16px !important;
   padding: 14px 16px !important;
   border-radius: 10px !important;
-  background: #f0fdf4 !important;
-  border: 1px solid #86efac !important;
+  background: color-mix(in srgb, var(--color-primary, #b5a1e0) 10%, #fff) !important;
+  border: 1.5px solid color-mix(in srgb, var(--color-primary, #b5a1e0) 30%, #fff) !important;
   text-align: center !important;
 }
 .cod-free-shipping-bar--reached {
-  background: #dcfce7 !important;
-  border-color: #4ade80 !important;
+  background: color-mix(in srgb, var(--color-primary, #b5a1e0) 15%, #fff) !important;
+  border-color: var(--color-primary, #b5a1e0) !important;
 }
 .cod-free-shipping-bar__text {
   font-size: 14px !important;
-  font-weight: 600 !important;
-  color: #166534 !important;
-  margin-bottom: 8px !important;
+  font-weight: 700 !important;
+  color: #333 !important;
+  margin-bottom: 10px !important;
   line-height: 1.4 !important;
 }
 .cod-free-shipping-bar__track {
-  height: 8px !important;
-  background: #d1d5db !important;
-  border-radius: 4px !important;
-  overflow: hidden !important;
+  height: 12px;
+  background: color-mix(in srgb, var(--color-primary, #b5a1e0) 12%, #fff);
+  border-radius: 6px;
+  overflow: visible;
+  position: relative;
+  margin-top: 18px;
 }
 .cod-free-shipping-bar__fill {
-  height: 100% !important;
-  background: linear-gradient(90deg, #4ade80, #16a34a) !important;
-  border-radius: 4px !important;
-  transition: width 0.3s ease !important;
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.5s ease;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    var(--color-primary, #b5a1e0),
+    var(--color-primary, #b5a1e0) 5px,
+    color-mix(in srgb, var(--color-primary, #b5a1e0) 55%, #fff) 5px,
+    color-mix(in srgb, var(--color-primary, #b5a1e0) 55%, #fff) 10px
+  );
+  background-size: 14.14px 14.14px;
+}
+.cod-free-shipping-bar__fill--animated {
+  animation: cod-shipping-stripes 0.8s linear infinite;
+}
+.cod-free-shipping-bar__truck {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid color-mix(in srgb, var(--color-primary, #b5a1e0) 40%, #fff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary, #b5a1e0);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  transition: left 0.5s ease;
+}
+@keyframes cod-shipping-stripes {
+  from { background-position: 0 0; }
+  to { background-position: 14.14px 0; }
 }

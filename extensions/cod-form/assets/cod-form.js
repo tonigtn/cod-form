@@ -315,9 +315,22 @@
   }
 
   function updateTotals() {
-    // Use cart subtotal if cart has items, otherwise single product
+    // Calculate subtotal: current product (offer-aware) + other cart items
     var cartItems = codCart.getAll();
-    var subtotal = cartItems.length > 0 ? codCart.subtotal() : (unitPrice * quantity);
+    var subtotal;
+    if (cartItems.length > 0) {
+      subtotal = 0;
+      for (var ci = 0; ci < cartItems.length; ci++) {
+        if (cartItems[ci].product_id === currentProductId) {
+          // Use offer quantity for current product
+          subtotal += unitPrice * quantity;
+        } else {
+          subtotal += cartItems[ci].price * (cartItems[ci].quantity || 1);
+        }
+      }
+    } else {
+      subtotal = unitPrice * quantity;
+    }
     var el;
 
     el = $('cod-subtotal');
@@ -403,7 +416,7 @@
       }
     }
 
-    updateFreeShippingBar(subtotal);
+    updateFreeShippingBar(subtotal - disc.amount + bumpTotal);
   }
 
   function updateFreeShippingBar(subtotal) {
@@ -413,18 +426,19 @@
     if (!threshold || threshold <= 0) { bar.hidden = true; return; }
     var remaining = threshold - subtotal;
     var progress = Math.min(100, Math.round((subtotal / threshold) * 100));
+    var truck = '<span class="cod-free-shipping-bar__truck" style="left:' + progress + '%"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></span>';
     if (remaining > 0) {
       bar.className = 'cod-free-shipping-bar';
       bar.innerHTML = '<div class="cod-free-shipping-bar__text">'
         + (L.free_shipping_remaining || '').replace('{amount}', '<strong>' + formatMoney(remaining) + '</strong>')
         + '</div>'
-        + '<div class="cod-free-shipping-bar__track"><div class="cod-free-shipping-bar__fill" style="width:' + progress + '%"></div></div>';
+        + '<div class="cod-free-shipping-bar__track"><div class="cod-free-shipping-bar__fill cod-free-shipping-bar__fill--animated" style="width:' + progress + '%"></div>' + truck + '</div>';
     } else {
       bar.className = 'cod-free-shipping-bar cod-free-shipping-bar--reached';
       bar.innerHTML = '<div class="cod-free-shipping-bar__text">'
         + (L.free_shipping_reached || '')
         + '</div>'
-        + '<div class="cod-free-shipping-bar__track"><div class="cod-free-shipping-bar__fill" style="width:100%"></div></div>';
+        + '<div class="cod-free-shipping-bar__track"><div class="cod-free-shipping-bar__fill cod-free-shipping-bar__fill--animated" style="width:100%"></div>' + truck + '</div>';
     }
     bar.hidden = false;
   }
