@@ -28,31 +28,34 @@ async def check_fraud(req: CodOrderRequest, ip: str, shop_id: int) -> FraudResul
     config: CodFraudConfig = (await load_store_config(shop_id)).fraud
     phone = _normalize_phone(req.phone)
 
+    from app.services.locale import get_shop_locale
+
+    locale = await get_shop_locale(req.shop)
+    is_el = locale.get("language") == "el"
+
     # 1. Phone blacklist (DB + per-store config)
     db_phones = await _load_blacklist(shop_id, "phone")
     if phone in db_phones or phone in config.blocked_phones:
         log.warning("cod_fraud_phone_blocked", shop=req.shop, phone_last4=phone[-4:])
-        return FraudResult(passed=False, reason="Numărul de telefon este blocat.")
+        msg = "Ο αριθμός τηλεφώνου είναι αποκλεισμένος." if is_el else "Numărul de telefon este blocat."
+        return FraudResult(passed=False, reason=msg)
 
     # 2. IP blacklist
     db_ips = await _load_blacklist(shop_id, "ip")
     if ip in db_ips or ip in config.blocked_ips:
         log.warning("cod_fraud_ip_blocked", shop=req.shop, ip=ip)
-        return FraudResult(passed=False, reason="Acces blocat.")
+        msg = "Πρόσβαση αποκλεισμένη." if is_el else "Acces blocat."
+        return FraudResult(passed=False, reason=msg)
 
     # 3. Blocked postal codes
     if req.zip and req.zip in config.blocked_postal_codes:
-        return FraudResult(
-            passed=False,
-            reason="Livrarea nu este disponibilă în această zonă.",
-        )
+        msg = "Η αποστολή δεν είναι διαθέσιμη σε αυτή την περιοχή." if is_el else "Livrarea nu este disponibilă în această zonă."
+        return FraudResult(passed=False, reason=msg)
 
     # 4. Duplicate phone within window
     if await _check_duplicate_phone(phone, shop_id, config):
-        return FraudResult(
-            passed=False,
-            reason="Comandă duplicat detectată. Încercați mai târziu.",
-        )
+        msg = "Εντοπίστηκε διπλή παραγγελία. Δοκιμάστε αργότερα." if is_el else "Comandă duplicat detectată. Încercați mai târziu."
+        return FraudResult(passed=False, reason=msg)
 
     return FraudResult(passed=True)
 
