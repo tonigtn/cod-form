@@ -13,6 +13,7 @@ class CodOrderRequest(BaseModel, frozen=True):
     store_id_legacy: str | None = Field(
         default=None, alias="store_id", description="Legacy store_id"
     )
+    product_id: int = Field(default=0, description="Shopify product ID")
     variant_id: int = Field(description="Shopify variant GID numeric ID")
     quantity: int = Field(default=1, ge=1, le=10)
     first_name: str = Field(min_length=1, max_length=100)

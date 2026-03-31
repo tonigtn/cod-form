@@ -2116,6 +2116,7 @@ function renderBumps() {
 
     var payload = {
       shop: SHOP,
+      product_id: currentProductId,
       variant_id: primaryVariantId,
       quantity: primaryQty,
       first_name: getVal('first_name'),
