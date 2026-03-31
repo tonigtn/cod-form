@@ -116,6 +116,10 @@
       for (var i = 0; i < items.length; i++) {
         if (items[i].variant_id === item.variant_id) {
           items[i].quantity = (items[i].quantity || 1) + (item.quantity || 1);
+          if (item.title && !items[i].title) items[i].title = item.title;
+          if (item.image_url && !items[i].image_url) items[i].image_url = item.image_url;
+          if (item.price) items[i].price = item.price;
+          if (item.compare_at_price) items[i].compare_at_price = item.compare_at_price;
           this._save(items);
           return items;
         }
@@ -797,7 +801,8 @@ function renderBumps() {
   /* ── Shipping rates ── */
   function fetchShippingRates() {
     if (!COD_API || !STORE_ID) return;
-    var subtotal = unitPrice * quantity;
+    var cartItems = codCart.getAll();
+    var subtotal = cartItems.length > 0 ? codCart.subtotal() : (unitPrice * quantity);
     var disc = getDiscountAmount();
     var bumpTotal = getBumpTotal();
     var orderTotal = subtotal - disc.amount + bumpTotal;
@@ -1635,7 +1640,7 @@ function renderBumps() {
 
   function addCurrentProductToCart() {
     if (!currentProductId || !currentVariantId) return;
-    // Read quantity from page quantity selector
+    if (codCart.has(currentVariantId)) return;
     var pageQty = 1;
     var qtyInput = document.querySelector('[name="quantity"], .quantity__input, input[data-quantity-input]');
     if (qtyInput) pageQty = parseInt(qtyInput.value, 10) || 1;
@@ -1660,22 +1665,32 @@ function renderBumps() {
     if (!container) return;
     var items = codCart.getAll();
     var header = $('cod-form-header');
-    if (items.length === 0) {
+
+    // When offers are active, filter out the current product — offers section handles it
+    var displayItems = items;
+    if (offers.length > 0 && currentProductId) {
+      displayItems = items.filter(function (i) { return i.product_id !== currentProductId; });
+    }
+
+    if (displayItems.length === 0) {
       container.hidden = true;
-      if (header) header.style.display = '';
+      if (header) { header.hidden = (offers.length > 0); header.style.display = offers.length > 0 ? 'none' : ''; }
       return;
     }
     container.hidden = false;
-    // Hide the single product header — cart list replaces it
-    if (header) header.style.display = 'none';
-    var html = '<div class="cod-cart__heading">' + (L.order_prefix || 'Order') + ' (' + codCart.count() + ' ' + (L.quantity_unit || 'items') + ')</div>';
-    for (var i = 0; i < items.length; i++) {
-      var item = items[i];
-      var itemTotal = (item.price * (item.quantity || 1));
+    if (header) { header.hidden = true; header.style.cssText = 'display:none!important'; }
+    // Count: display items + offer product quantity
+    var totalCount = displayItems.reduce(function (s, i) { return s + (i.quantity || 1); }, 0) + (offers.length > 0 ? quantity : 0);
+    var html = '<div class="cod-cart__heading">' + (L.order_prefix || 'Order') + ' (' + totalCount + ' ' + (L.quantity_unit || 'items') + ')</div>';
+    for (var i = 0; i < displayItems.length; i++) {
+      var item = displayItems[i];
       html += '<div class="cod-cart__item" data-vid="' + item.variant_id + '">'
-        + (item.image_url ? '<img class="cod-cart__img" src="' + item.image_url + '&width=96" alt="" loading="lazy">' : '')
+        + (item.image_url ? '<img class="cod-cart__img" src="' + item.image_url + '&width=160" alt="" loading="lazy">' : '')
         + '<div class="cod-cart__info">'
-        + '<div class="cod-cart__title">' + item.title + '</div>'
+        + '<div class="cod-cart__title-row">'
+        + '<span class="cod-cart__title">' + item.title + '</span>'
+        + ' <button type="button" class="cod-cart__remove" data-vid="' + item.variant_id + '">×</button>'
+        + '</div>'
         + '<div class="cod-cart__price">' + formatMoney(item.price) + (item.compare_at_price > item.price ? ' <span class="cod-cart__compare">' + formatMoney(item.compare_at_price) + '</span>' : '') + '</div>'
         + '<div class="cod-cart__qty">'
         + '<button type="button" class="cod-cart__qty-btn" data-action="dec" data-vid="' + item.variant_id + '">−</button>'
@@ -1683,7 +1698,6 @@ function renderBumps() {
         + '<button type="button" class="cod-cart__qty-btn" data-action="inc" data-vid="' + item.variant_id + '">+</button>'
         + '</div>'
         + '</div>'
-        + '<button type="button" class="cod-cart__remove" data-vid="' + item.variant_id + '">×</button>'
         + '</div>';
     }
     container.innerHTML = html;
@@ -1695,6 +1709,7 @@ function renderBumps() {
     var subEl = $('cod-subtotal');
     if (subEl) subEl.textContent = formatMoney(sub);
     updateTotals();
+    fetchShippingRates();
   }
 
   function updateButtonBadge() {
@@ -1851,6 +1866,7 @@ function renderBumps() {
       trackEvent('offer_select', { quantity: fcQty });
       updateTotals();
       renderFormOffers();
+      renderCartList();
       return;
     }
 
@@ -1859,6 +1875,7 @@ function renderBumps() {
     if (offerTile) {
       quantity = parseInt(offerTile.getAttribute('data-min-qty'), 10) || 1;
       updateTotals();
+      renderCartList();
       return;
     }
 
