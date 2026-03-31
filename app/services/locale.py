@@ -123,6 +123,8 @@ _RO_LABELS: dict[str, str] = {
     "zip": "Cod poștal",
     "email": "Email",
     "announcement": "Transport gratuit pentru comenzi peste 150 lei!",
+    "free_shipping_remaining": "Mai ai nevoie de {amount} pentru livrare GRATUITĂ!",
+    "free_shipping_reached": "Felicitări! Beneficiezi de livrare GRATUITĂ! 🎉",
 }
 
 _EL_LABELS: dict[str, str] = {
@@ -180,6 +182,8 @@ _EL_LABELS: dict[str, str] = {
     "zip": "Ταχ. Κώδικας",
     "email": "Email",
     "announcement": "Δωρεάν αποστολή για παραγγελίες άνω των 40€!",
+    "free_shipping_remaining": "Χρειάζεσαι ακόμα {amount} για ΔΩΡΕΑΝ αποστολή!",
+    "free_shipping_reached": "Συγχαρητήρια! Απολαμβάνεις ΔΩΡΕΑΝ αποστολή! 🎉",
 }
 
 # Country code → locale config

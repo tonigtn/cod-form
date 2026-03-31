@@ -162,6 +162,7 @@ async def form_config_endpoint(
         "shipping": {
             "default_rate": config.shipping.default_rate,
             "province_rates": config.shipping.province_rates,
+            "free_threshold": config.shipping.free_threshold,
         },
         "prepaid": config.prepaid.model_dump(),
         "offers_style": config.offers_style.model_dump(),

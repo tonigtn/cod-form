@@ -94,6 +94,8 @@
     accept_offer: 'Acceptă Oferta',
     reject_offer: 'Nu, mulțumesc',
     phone_error: 'Format: 07XX XXX XXX (10 cifre)',
+    free_shipping_remaining: 'Mai ai nevoie de {amount} pentru livrare GRATUITĂ!',
+    free_shipping_reached: 'Felicitări! Beneficiezi de livrare GRATUITĂ! 🎉',
   };
 
   /* ── Multi-product cart (sessionStorage) ── */
@@ -246,7 +248,10 @@
 
   /* ── Helpers ── */
   function formatMoney(amount) {
-    return amount.toFixed(2).replace('.', ',') + ' ' + CURRENCY;
+    var formatted = amount.toFixed(2).replace('.', ',');
+    if (CURRENCY === 'RON') return formatted + ' lei';
+    if (CURRENCY === 'EUR') return '€' + formatted;
+    return formatted + ' ' + CURRENCY;
   }
 
   function getDiscountAmount() {
@@ -397,6 +402,31 @@
         feeLine.hidden = true;
       }
     }
+
+    updateFreeShippingBar(subtotal);
+  }
+
+  function updateFreeShippingBar(subtotal) {
+    var bar = $('cod-free-shipping-bar');
+    if (!bar) return;
+    var threshold = formConfig && formConfig.shipping && formConfig.shipping.free_threshold;
+    if (!threshold || threshold <= 0) { bar.hidden = true; return; }
+    var remaining = threshold - subtotal;
+    var progress = Math.min(100, Math.round((subtotal / threshold) * 100));
+    if (remaining > 0) {
+      bar.className = 'cod-free-shipping-bar';
+      bar.innerHTML = '<div class="cod-free-shipping-bar__text">'
+        + (L.free_shipping_remaining || '').replace('{amount}', '<strong>' + formatMoney(remaining) + '</strong>')
+        + '</div>'
+        + '<div class="cod-free-shipping-bar__track"><div class="cod-free-shipping-bar__fill" style="width:' + progress + '%"></div></div>';
+    } else {
+      bar.className = 'cod-free-shipping-bar cod-free-shipping-bar--reached';
+      bar.innerHTML = '<div class="cod-free-shipping-bar__text">'
+        + (L.free_shipping_reached || '')
+        + '</div>'
+        + '<div class="cod-free-shipping-bar__track"><div class="cod-free-shipping-bar__fill" style="width:100%"></div></div>';
+    }
+    bar.hidden = false;
   }
 
   function clearErrors() {

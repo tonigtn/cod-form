@@ -1624,7 +1624,7 @@ select.cod-upsell-page__variant-select {
 .cod-cart__price {
   font-size: 14px !important;
   font-weight: 700 !important;
-  color: var(--color-primary, #b5a1e0) !important;
+  color: var(--color-success, #059669) !important;
   margin-top: 2px !important;
 }
 .cod-cart__compare {
@@ -1681,4 +1681,37 @@ select.cod-upsell-page__variant-select {
   align-items: center !important;
   justify-content: center !important;
   padding: 0 5px !important;
+}
+
+/* ═══ Free shipping progress bar ═══ */
+.cod-free-shipping-bar {
+  margin: 0 0 16px !important;
+  padding: 14px 16px !important;
+  border-radius: 10px !important;
+  background: #f0fdf4 !important;
+  border: 1px solid #86efac !important;
+  text-align: center !important;
+}
+.cod-free-shipping-bar--reached {
+  background: #dcfce7 !important;
+  border-color: #4ade80 !important;
+}
+.cod-free-shipping-bar__text {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: #166534 !important;
+  margin-bottom: 8px !important;
+  line-height: 1.4 !important;
+}
+.cod-free-shipping-bar__track {
+  height: 8px !important;
+  background: #d1d5db !important;
+  border-radius: 4px !important;
+  overflow: hidden !important;
+}
+.cod-free-shipping-bar__fill {
+  height: 100% !important;
+  background: linear-gradient(90deg, #4ade80, #16a34a) !important;
+  border-radius: 4px !important;
+  transition: width 0.3s ease !important;
 }
