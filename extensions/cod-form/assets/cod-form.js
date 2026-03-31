@@ -96,9 +96,6 @@
     phone_error: 'Format: 07XX XXX XXX (10 cifre)',
     free_shipping_remaining: 'Mai ai nevoie de {amount} pentru livrare GRATUITĂ!',
     free_shipping_reached: 'Felicitări! Beneficiezi de livrare GRATUITĂ! 🎉',
-    auto_discount_text: 'Reducere suplimentară de',
-    auto_discount_applied: 'aplicată automat în coș!',
-    auto_discount_urgency: '⚡ Ofertă valabilă doar pentru comenzile de astăzi',
   };
 
   /* ── Multi-product cart (sessionStorage) ── */
@@ -447,21 +444,6 @@
         + 'background-size:14.14px 14.14px;transition:width 0.5s ease;';
     }
     bar.hidden = false;
-  }
-
-  function renderAutoDiscount() {
-    var el = $('cod-auto-discount');
-    if (!el) return;
-    if (!comparePrice || comparePrice <= unitPrice) { el.hidden = true; return; }
-    var savings = comparePrice - unitPrice;
-    el.innerHTML = '<div class="cod-auto-discount__icon">🎁</div>'
-      + '<div class="cod-auto-discount__text">'
-      + '<strong>' + (L.auto_discount_text || 'Reducere suplimentară de') + '</strong><br>'
-      + '<span class="cod-auto-discount__amount">' + formatMoney(savings) + '</span><br>'
-      + '<em>' + (L.auto_discount_applied || 'aplicată automat în coș!') + '</em>'
-      + '</div>'
-      + '<div class="cod-auto-discount__urgency">' + (L.auto_discount_urgency || '') + '</div>';
-    el.hidden = false;
   }
 
   function clearErrors() {
@@ -1818,7 +1800,6 @@ function renderBumps() {
     }
     // Render cart items list + auto-discount banner
     renderCartList();
-    renderAutoDiscount();
     if (availableBumps.length === 0) fetchBumps();
     fetchDownsell();
     fetchShippingRates();

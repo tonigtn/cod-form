@@ -125,9 +125,6 @@ _RO_LABELS: dict[str, str] = {
     "announcement": "Transport gratuit pentru comenzi peste 150 lei!",
     "free_shipping_remaining": "Mai ai nevoie de {amount} pentru livrare GRATUITĂ!",
     "free_shipping_reached": "Felicitări! Beneficiezi de livrare GRATUITĂ! 🎉",
-    "auto_discount_text": "Reducere suplimentară de",
-    "auto_discount_applied": "aplicată automat în coș!",
-    "auto_discount_urgency": "⚡ Ofertă valabilă doar pentru comenzile de astăzi",
 }
 
 _EL_LABELS: dict[str, str] = {
@@ -187,9 +184,6 @@ _EL_LABELS: dict[str, str] = {
     "announcement": "Δωρεάν αποστολή για παραγγελίες άνω των 40€!",
     "free_shipping_remaining": "Χρειάζεσαι ακόμα {amount} για ΔΩΡΕΑΝ αποστολή!",
     "free_shipping_reached": "Συγχαρητήρια! Απολαμβάνεις ΔΩΡΕΑΝ αποστολή! 🎉",
-    "auto_discount_text": "Επιπλέον έκπτωση",
-    "auto_discount_applied": "εφαρμόζεται αυτόματα στο καλάθι!",
-    "auto_discount_urgency": "⚡ Προσφορά μόνο για τις σημερινές παραγγελίες",
 }
 
 # Country code → locale config

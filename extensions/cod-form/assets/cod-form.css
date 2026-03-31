@@ -1683,38 +1683,6 @@ select.cod-upsell-page__variant-select {
   padding: 0 5px !important;
 }
 
-/* ═══ Auto-discount banner ═══ */
-.cod-auto-discount {
-  margin: 0 0 12px !important;
-  padding: 16px !important;
-  border-radius: 12px !important;
-  border: 2px dashed var(--color-primary, #b5a1e0) !important;
-  background: #faf8ff !important;
-  text-align: center !important;
-}
-.cod-auto-discount__icon {
-  font-size: 28px !important;
-  margin-bottom: 6px !important;
-  line-height: 1 !important;
-}
-.cod-auto-discount__text {
-  font-size: 14px !important;
-  line-height: 1.5 !important;
-  color: var(--color-primary, #b5a1e0) !important;
-}
-.cod-auto-discount__amount {
-  font-size: 22px !important;
-  font-weight: 800 !important;
-  color: #333 !important;
-  display: block !important;
-  margin: 4px 0 !important;
-}
-.cod-auto-discount__urgency {
-  font-size: 12px !important;
-  color: #888 !important;
-  margin-top: 8px !important;
-}
-
 /* ═══ Free shipping progress bar ═══ */
 .cod-free-shipping-bar {
   margin: 0 0 16px !important;
