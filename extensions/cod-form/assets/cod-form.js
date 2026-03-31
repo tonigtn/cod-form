@@ -2358,6 +2358,7 @@ function renderBumps() {
       .then(function (data) {
         if (data.success) {
           orderPlaced = true;
+          pendingPayload = null;
           if (upsellContainer) upsellContainer.hidden = true;
 
           var successDiv = $('cod-success');
