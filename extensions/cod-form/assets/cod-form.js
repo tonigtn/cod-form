@@ -96,6 +96,9 @@
     phone_error: 'Format: 07XX XXX XXX (10 cifre)',
     free_shipping_remaining: 'Mai ai nevoie de {amount} pentru livrare GRATUITĂ!',
     free_shipping_reached: 'Felicitări! Beneficiezi de livrare GRATUITĂ! 🎉',
+    auto_discount_text: 'Reducere suplimentară de',
+    auto_discount_applied: 'aplicată automat în coș!',
+    auto_discount_urgency: '⚡ Ofertă valabilă doar pentru comenzile de astăzi',
   };
 
   /* ── Multi-product cart (sessionStorage) ── */
@@ -426,21 +429,39 @@
     if (!threshold || threshold <= 0) { bar.hidden = true; return; }
     var remaining = threshold - subtotal;
     var progress = Math.min(100, Math.round((subtotal / threshold) * 100));
-    var truck = '<span class="cod-free-shipping-bar__truck" style="left:' + progress + '%"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></span>';
-    if (remaining > 0) {
-      bar.className = 'cod-free-shipping-bar';
-      bar.innerHTML = '<div class="cod-free-shipping-bar__text">'
-        + (L.free_shipping_remaining || '').replace('{amount}', '<strong>' + formatMoney(remaining) + '</strong>')
-        + '</div>'
-        + '<div class="cod-free-shipping-bar__track"><div class="cod-free-shipping-bar__fill cod-free-shipping-bar__fill--animated" style="width:' + progress + '%"></div>' + truck + '</div>';
-    } else {
-      bar.className = 'cod-free-shipping-bar cod-free-shipping-bar--reached';
-      bar.innerHTML = '<div class="cod-free-shipping-bar__text">'
-        + (L.free_shipping_reached || '')
-        + '</div>'
-        + '<div class="cod-free-shipping-bar__track"><div class="cod-free-shipping-bar__fill cod-free-shipping-bar__fill--animated" style="width:100%"></div>' + truck + '</div>';
+    var pct = remaining > 0 ? progress : 100;
+    var truck = '<span class="cod-free-shipping-bar__truck" style="left:' + pct + '%"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></span>';
+    bar.className = remaining > 0 ? 'cod-free-shipping-bar' : 'cod-free-shipping-bar cod-free-shipping-bar--reached';
+    bar.innerHTML = '<div class="cod-free-shipping-bar__text">'
+      + (remaining > 0
+        ? (L.free_shipping_remaining || '').replace('{amount}', '<strong>' + formatMoney(remaining) + '</strong>')
+        : (L.free_shipping_reached || ''))
+      + '</div>'
+      + '<div class="cod-free-shipping-bar__track"><div class="cod-free-shipping-bar__fill cod-free-shipping-bar__fill--animated" style="width:' + pct + '%"></div>' + truck + '</div>';
+    // Apply stripe gradient + all critical styles via JS (theme-proof)
+    var pc = getComputedStyle(document.documentElement).getPropertyValue('--color-primary').trim() || '#b5a1e0';
+    var fill = bar.querySelector('.cod-free-shipping-bar__fill');
+    if (fill) {
+      fill.style.cssText = 'width:' + pct + '%;height:12px;min-height:12px;border-radius:6px;display:block;'
+        + 'background-image:repeating-linear-gradient(-45deg,' + pc + ' 0,' + pc + ' 5px,' + pc + '66 5px,' + pc + '66 10px);'
+        + 'background-size:14.14px 14.14px;transition:width 0.5s ease;';
     }
     bar.hidden = false;
+  }
+
+  function renderAutoDiscount() {
+    var el = $('cod-auto-discount');
+    if (!el) return;
+    if (!comparePrice || comparePrice <= unitPrice) { el.hidden = true; return; }
+    var savings = comparePrice - unitPrice;
+    el.innerHTML = '<div class="cod-auto-discount__icon">🎁</div>'
+      + '<div class="cod-auto-discount__text">'
+      + '<strong>' + (L.auto_discount_text || 'Reducere suplimentară de') + '</strong><br>'
+      + '<span class="cod-auto-discount__amount">' + formatMoney(savings) + '</span><br>'
+      + '<em>' + (L.auto_discount_applied || 'aplicată automat în coș!') + '</em>'
+      + '</div>'
+      + '<div class="cod-auto-discount__urgency">' + (L.auto_discount_urgency || '') + '</div>';
+    el.hidden = false;
   }
 
   function clearErrors() {
@@ -1795,8 +1816,9 @@ function renderBumps() {
       var firstInput = form.querySelector('input');
       if (firstInput) setTimeout(function () { firstInput.focus(); }, 100);
     }
-    // Render cart items list
+    // Render cart items list + auto-discount banner
     renderCartList();
+    renderAutoDiscount();
     if (availableBumps.length === 0) fetchBumps();
     fetchDownsell();
     fetchShippingRates();

@@ -1683,18 +1683,50 @@ select.cod-upsell-page__variant-select {
   padding: 0 5px !important;
 }
 
+/* ═══ Auto-discount banner ═══ */
+.cod-auto-discount {
+  margin: 0 0 12px !important;
+  padding: 16px !important;
+  border-radius: 12px !important;
+  border: 2px dashed var(--color-primary, #b5a1e0) !important;
+  background: #faf8ff !important;
+  text-align: center !important;
+}
+.cod-auto-discount__icon {
+  font-size: 28px !important;
+  margin-bottom: 6px !important;
+  line-height: 1 !important;
+}
+.cod-auto-discount__text {
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  color: var(--color-primary, #b5a1e0) !important;
+}
+.cod-auto-discount__amount {
+  font-size: 22px !important;
+  font-weight: 800 !important;
+  color: #333 !important;
+  display: block !important;
+  margin: 4px 0 !important;
+}
+.cod-auto-discount__urgency {
+  font-size: 12px !important;
+  color: #888 !important;
+  margin-top: 8px !important;
+}
+
 /* ═══ Free shipping progress bar ═══ */
 .cod-free-shipping-bar {
   margin: 0 0 16px !important;
   padding: 14px 16px !important;
   border-radius: 10px !important;
-  background: color-mix(in srgb, var(--color-primary, #b5a1e0) 10%, #fff) !important;
-  border: 1.5px solid color-mix(in srgb, var(--color-primary, #b5a1e0) 30%, #fff) !important;
+  background: #f5f2fa !important;
+  border: 1.5px solid #e0d6f0 !important;
   text-align: center !important;
 }
 .cod-free-shipping-bar--reached {
-  background: color-mix(in srgb, var(--color-primary, #b5a1e0) 15%, #fff) !important;
-  border-color: var(--color-primary, #b5a1e0) !important;
+  background: #ece6f7 !important;
+  border-color: #b5a1e0 !important;
 }
 .cod-free-shipping-bar__text {
   font-size: 14px !important;
@@ -1704,46 +1736,40 @@ select.cod-upsell-page__variant-select {
   line-height: 1.4 !important;
 }
 .cod-free-shipping-bar__track {
-  height: 12px;
-  background: color-mix(in srgb, var(--color-primary, #b5a1e0) 12%, #fff);
-  border-radius: 6px;
-  overflow: visible;
-  position: relative;
-  margin-top: 18px;
+  height: 12px !important;
+  background: #ede9f5 !important;
+  border-radius: 6px !important;
+  overflow: visible !important;
+  position: relative !important;
+  margin-top: 18px !important;
 }
 .cod-free-shipping-bar__fill {
-  height: 100%;
-  border-radius: 6px;
-  transition: width 0.5s ease;
-  background-image: repeating-linear-gradient(
-    -45deg,
-    var(--color-primary, #b5a1e0),
-    var(--color-primary, #b5a1e0) 5px,
-    color-mix(in srgb, var(--color-primary, #b5a1e0) 55%, #fff) 5px,
-    color-mix(in srgb, var(--color-primary, #b5a1e0) 55%, #fff) 10px
-  );
-  background-size: 14.14px 14.14px;
+  height: 12px !important;
+  min-height: 12px !important;
+  border-radius: 6px !important;
+  transition: width 0.5s ease !important;
+  display: block !important;
 }
 .cod-free-shipping-bar__fill--animated {
-  animation: cod-shipping-stripes 0.8s linear infinite;
-}
-.cod-free-shipping-bar__truck {
-  position: absolute;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: #fff;
-  border: 2px solid color-mix(in srgb, var(--color-primary, #b5a1e0) 40%, #fff);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-primary, #b5a1e0);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  transition: left 0.5s ease;
+  animation: cod-shipping-stripes 0.8s linear infinite !important;
 }
 @keyframes cod-shipping-stripes {
   from { background-position: 0 0; }
   to { background-position: 14.14px 0; }
+}
+.cod-free-shipping-bar__truck {
+  position: absolute !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 50% !important;
+  background: #fff !important;
+  border: 2px solid #d4c8f0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: var(--color-primary, #b5a1e0) !important;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1) !important;
+  transition: left 0.5s ease !important;
 }
