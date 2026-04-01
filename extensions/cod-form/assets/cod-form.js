@@ -1743,6 +1743,7 @@ function renderBumps() {
     if (displayItems.length === 0) {
       container.hidden = true;
       if (header) { header.hidden = (offers.length > 0); header.style.display = offers.length > 0 ? 'none' : ''; }
+      updateCartTotals();
       return;
     }
     container.hidden = false;
