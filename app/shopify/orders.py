@@ -83,7 +83,7 @@ async def create_cod_order(req: CodOrderRequest, shop_id: int) -> CodOrderRespon
 
     # Check for quantity discount
     total_qty = len(req.variant_ids) if req.variant_ids else req.quantity
-    offer = await get_active_offer(shop_id, total_qty)
+    offer = await get_active_offer(shop_id, total_qty, product_id=req.product_id or None)
     discount_title = ""
     if offer:
         discount_title = f"Ofertă cantitate ({offer.label})"
