@@ -182,7 +182,7 @@ async def create_cod_order(req: CodOrderRequest, shop_id: int) -> CodOrderRespon
             "province": req.province,
             "country": "Greece" if country == "GR" else "Romania",
             "countryCode": country,
-            "zip": req.zip or ("00000" if country == "GR" else "000000"),
+            "zip": req.zip or "",
         },
         "shippingLine": {
             "title": "Courier" if country == "GR" else "Curier",
