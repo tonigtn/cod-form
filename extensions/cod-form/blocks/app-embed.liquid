@@ -95,7 +95,7 @@
           </div>
 
           <div class="cod-form__line"><span>{{ 'sections.cod_form.subtotal' | t }}</span><span id="cod-subtotal"></span></div>
-          <div class="cod-form__line cod-form__line--discount"><span id="cod-discount-label" style="color:var(--color-primary,#b5a1e0)">{{ 'sections.cod_form.discount' | t }}</span><span id="cod-discount-amount"></span></div>
+          <div class="cod-form__line cod-form__line--discount" id="cod-discount-line" hidden><span id="cod-discount-label" style="color:var(--color-primary,#b5a1e0)">{{ 'sections.cod_form.discount' | t }}</span><span id="cod-discount-amount"></span></div>
           <div class="cod-form__line"><span>{{ 'sections.cod_form.shipping' | t }}</span><span id="cod-shipping"></span></div>
           <div class="cod-form__line" id="cod-fee-line"><span id="cod-fee-label"></span><span id="cod-fee-amount"></span></div>
           <div class="cod-form__line" id="cod-added-products-line" style="color:var(--color-primary,#b5a1e0)"><span id="cod-added-label"></span><span id="cod-added-amount"></span></div>

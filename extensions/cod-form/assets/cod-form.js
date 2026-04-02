@@ -389,6 +389,10 @@
       if (el) el.textContent = disc.source === 'offer' ? disc.label : (((STORE_ID === 'store_4') ? 'Κωδικός: ' : 'Cod: ') + disc.label);
     } else {
       if (discLine) discLine.hidden = true;
+      el = $('cod-discount-amount');
+      if (el) el.textContent = '';
+      el = $('cod-discount-label');
+      if (el) el.textContent = '';
     }
 
     var bumpTotal = getBumpTotal();
