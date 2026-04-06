@@ -877,7 +877,19 @@ function renderBumps() {
   function fetchShippingRates() {
     if (!COD_API || !STORE_ID) return;
     var cartItems = codCart.getAll();
-    var subtotal = cartItems.length > 0 ? codCart.subtotal() : (unitPrice * quantity);
+    var subtotal;
+    if (cartItems.length > 0) {
+      subtotal = 0;
+      for (var si = 0; si < cartItems.length; si++) {
+        if (cartItems[si].product_id === currentProductId) {
+          subtotal += unitPrice * quantity;
+        } else {
+          subtotal += cartItems[si].price * (cartItems[si].quantity || 1);
+        }
+      }
+    } else {
+      subtotal = unitPrice * quantity;
+    }
     var disc = getDiscountAmount();
     var bumpTotal = getBumpTotal();
     var orderTotal = subtotal - disc.amount + bumpTotal;
