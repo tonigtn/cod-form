@@ -853,7 +853,6 @@ function renderBumps() {
         + (b.image_url ? '<img class="cod-form__bump-img" src="' + b.image_url + '&width=80" alt="" loading="lazy">' : '')
         + '<span class="cod-form__bump-info">'
         + '<span class="cod-form__bump-title">' + parseBumpMarkdown(b.text || b.title) + '</span>'
-        + (b.price ? '<span class="cod-form__bump-price">' + formatMoney(parseFloat(b.price)) + '</span>' : '')
         + '</span>'
         + '</label>';
     }
