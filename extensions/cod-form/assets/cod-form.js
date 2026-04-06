@@ -1304,6 +1304,10 @@ function renderBumps() {
         if (cfg.layout && cfg.layout.length) applyFieldLayout(cfg.layout);
         initPrepaidButton(cfg);
         initAddressAutocomplete(cfg);
+        // Re-render offers with updated locale labels
+        renderOffers();
+        renderPageOffers();
+        renderFormOffers();
       })
       .catch(function () { /* silent — defaults work fine */ });
   }
