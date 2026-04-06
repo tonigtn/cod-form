@@ -77,7 +77,7 @@ async def deploy() -> None:
         "label_color": "#555555",
         "border_radius": "12px",
         "max_width": "480px",
-        "overlay_opacity": 0.5,
+        "overlay_opacity": "0.5",
         "product_image_size": "80px",
         "accent_color": "#b5a1e0",
     })
