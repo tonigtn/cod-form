@@ -1728,8 +1728,8 @@ function renderBumps() {
     var qtyInput = document.querySelector('[name="quantity"], .quantity__input, input[data-quantity-input]');
     if (qtyInput) pageQty = parseInt(qtyInput.value, 10) || 1;
 
-    var productTitle = script.getAttribute('data-product-title') || '';
-    var productImage = script.getAttribute('data-product-image') || '';
+    var productTitle = script.getAttribute('data-product-title') || document.querySelector('.product__title, .product-title, h1.title')?.textContent?.trim() || '';
+    var productImage = script.getAttribute('data-product-image') || document.querySelector('.product__media img, .product-gallery img, .product-single__photo img')?.getAttribute('src') || '';
 
     codCart.add({
       product_id: currentProductId,
