@@ -2471,9 +2471,6 @@ function renderBumps() {
         return;
       }
       var p = products[idx];
-      var hasCompare = p.compare_at_price && parseFloat(p.compare_at_price) > parseFloat(p.price);
-      var savings = hasCompare ? (parseFloat(p.compare_at_price) - parseFloat(p.price)).toFixed(2) : 0;
-
       // Per-offer config from formConfig.upsell_config
       var uc = (formConfig && formConfig.upsell_config) || {};
       var offerCfg = null;
@@ -2482,6 +2479,10 @@ function renderBumps() {
           if (uc.offers[oi].product_id === p.product_id) { offerCfg = uc.offers[oi]; break; }
         }
       }
+      // Use configured discount_amount if set, otherwise fall back to compare_at_price difference
+      var configuredDiscount = (offerCfg && offerCfg.discount_amount) ? parseFloat(offerCfg.discount_amount) : 0;
+      var hasCompare = configuredDiscount > 0 || (p.compare_at_price && parseFloat(p.compare_at_price) > parseFloat(p.price));
+      var savings = configuredDiscount > 0 ? configuredDiscount.toFixed(2) : (hasCompare ? (parseFloat(p.compare_at_price) - parseFloat(p.price)).toFixed(2) : 0);
       var timerDur = (offerCfg && offerCfg.timer_duration) || uc.default_timer_duration || 60;
       var acceptText = (offerCfg && offerCfg.accept_text) || uc.default_accept_text || L.accept_offer;
       var rejectText = (offerCfg && offerCfg.reject_text) || uc.default_reject_text || L.reject_offer;
@@ -2497,6 +2498,7 @@ function renderBumps() {
       var cur = p.currency || CURRENCY;
       var regularPrice = parseFloat(p.price);
       var upsellPrice = hasCompare ? (regularPrice - parseFloat(savings)) : regularPrice;
+      var displayCompare = configuredDiscount > 0 ? regularPrice : (hasCompare ? parseFloat(p.compare_at_price) : 0);
       var rejectFinalText = L.upsell_no_thanks;
 
       var html = '<div class="cod-upsell-page">';
