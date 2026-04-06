@@ -136,12 +136,24 @@ if _WEB_DIST.is_dir():
 @app.exception_handler(RequestValidationError)
 async def validation_error_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
     """Return friendly validation errors."""
+    # Detect language from request body
+    error = "Date invalide. Verifică câmpurile."
+    try:
+        body = exc.body
+        if isinstance(body, dict):
+            shop = body.get("shop", "")
+            if "jcqx7t" in shop:
+                error = "Nieprawidłowe dane. Sprawdź pola formularza."
+            elif "jgj1ff" in shop:
+                error = "Μη έγκυρα δεδομένα. Ελέγξτε τα πεδία."
+    except Exception:
+        pass
     return JSONResponse(
         status_code=200,
         content={
             "success": False,
             "order_name": "",
             "order_id": 0,
-            "error": "Date invalide. Verifică câmpurile.",
+            "error": error,
         },
     )

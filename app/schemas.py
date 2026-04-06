@@ -18,7 +18,7 @@ class CodOrderRequest(BaseModel, frozen=True):
     quantity: int = Field(default=1, ge=1, le=10)
     first_name: str = Field(min_length=1, max_length=100)
     last_name: str = Field(min_length=1, max_length=100)
-    phone: str = Field(min_length=10, max_length=15)
+    phone: str = Field(min_length=9, max_length=15)
     city: str = Field(min_length=1, max_length=100)
     province: str = Field(min_length=1, max_length=100)
     address1: str = Field(min_length=1, max_length=300)
@@ -198,7 +198,7 @@ class OtpSendRequest(BaseModel, frozen=True):
 
     shop: str = ""
     store_id_legacy: str | None = Field(default=None, alias="store_id")
-    phone: str = Field(min_length=10, max_length=15)
+    phone: str = Field(min_length=9, max_length=15)
 
 
 class OtpSendResponse(BaseModel, frozen=True):
@@ -214,7 +214,7 @@ class OtpVerifyRequest(BaseModel, frozen=True):
 
     shop: str = ""
     store_id_legacy: str | None = Field(default=None, alias="store_id")
-    phone: str = Field(min_length=10, max_length=15)
+    phone: str = Field(min_length=9, max_length=15)
     code: str = Field(min_length=4, max_length=8)
 
 
