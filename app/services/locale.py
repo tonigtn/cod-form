@@ -223,7 +223,7 @@ _PL_LABELS: dict[str, str] = {
     "otp_resent": "Kod wysłany ponownie!",
     "otp_error": "Nie udało się wysłać kodu weryfikacyjnego.",
     "online_payment": "\U0001f4b3 Zapłać kartą",
-    "bumps_heading": "Dodaj do zamówienia",
+    "bumps_heading": "\u2b07\ufe0f Oferty promocyjne \u2b07\ufe0f",
     "discount_prefix": "Kod",
     "discount_invalid": "Nieprawidłowy kod",
     "discount_check_error": "Błąd weryfikacji",
