@@ -14,7 +14,7 @@ import sys
 
 sys.path.insert(0, ".")
 
-from app.db import pool  # noqa: E402
+from app.db.pool import close_pool, execute, fetchval, init_pool  # noqa: E402
 
 SHOP = "jcqx7t-0b.myshopify.com"
 
@@ -37,20 +37,20 @@ OFFER_BOTTLE_PRODUCT_ID = 15570895995210  # Butelka Hands-Free
 
 async def deploy() -> None:
     """Push all config sections for bebemate.pl."""
-    await pool.init()
+    await init_pool()
 
     # Get shop_id from DB
-    shop_id = await pool.fetchval(
+    shop_id = await fetchval(
         "SELECT id FROM shops WHERE shop_domain = $1", SHOP
     )
     if not shop_id:
         print(f"ERROR: Shop {SHOP} not found in DB. Run OAuth install first.")
         print(f"Visit: https://api.magazinultarii.ro/auth/install?shop={SHOP}")
-        await pool.close()
+        await close_pool()
         return
 
     # Update shop metadata
-    await pool.execute(
+    await execute(
         "UPDATE shops SET locale = 'pl', country_code = 'PL', currency = 'PLN', store_name = 'BebeMate PL' WHERE id = $1",
         shop_id,
     )
@@ -305,7 +305,7 @@ async def deploy() -> None:
         "discounts": [],
     })
 
-    await pool.close()
+    await close_pool()
     print("\nAll config sections deployed for BebeMate PL!")
     print("Next steps:")
     print("  1. Add extension block to product templates via Shopify admin")
@@ -314,7 +314,7 @@ async def deploy() -> None:
 
 async def _save(shop_id: int, section: str, data: dict | list) -> None:
     """Upsert a config section."""
-    await pool.execute(
+    await execute(
         """
         INSERT INTO shop_configs (shop_id, section, config, updated_at)
         VALUES ($1, $2, $3::jsonb, NOW())
