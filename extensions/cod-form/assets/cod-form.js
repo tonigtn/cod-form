@@ -389,7 +389,7 @@
       el = $('cod-discount-amount');
       if (el) el.textContent = '-' + formatMoney(disc.amount);
       el = $('cod-discount-label');
-      if (el) el.textContent = disc.source === 'offer' ? disc.label : (((_isGreek) ? 'Κωδικός: ' : 'Cod: ') + disc.label);
+      if (el) el.textContent = disc.source === 'offer' ? disc.label : (L.discount_prefix + ': ' + disc.label);
     } else {
       if (discLine) discLine.hidden = true;
       el = $('cod-discount-amount');
@@ -404,7 +404,7 @@
     var shippingEl = $('cod-shipping');
     if (shippingEl) {
       if (shippingPrice === 0) {
-        shippingEl.textContent = (_isGreek) ? 'Δωρεάν' : 'Gratuit';
+        shippingEl.textContent = L.free_shipping;
         shippingEl.style.color = '#2E7D32';
         shippingEl.style.fontWeight = '600';
       } else {
@@ -511,7 +511,7 @@
   }
 
   function offerTitle(o) {
-    return o.title || (o.min_qty + ((_isGreek) ? ' τεμ' : ' buc'));
+    return o.title || (o.min_qty + ' ' + L.quantity_unit);
   }
 
   function offerTagBg(o, isActive, os) {
@@ -615,9 +615,9 @@
         html += '<div class="cod-page-offer__qty" style="color:' + titleColor + ';font-size:' + titleSize + ';font-weight:' + titleBold + ';font-style:' + titleItalic + '">' + offerTitle(o) + '</div>';
         html += '<div class="cod-page-offer__price" style="color:' + priceColor + ';font-size:' + priceSize + ';font-weight:' + priceBold + ';font-style:' + priceItalic + '">' + formatMoney(perUnit) + (o.min_qty > 1 ? (('/' + L.quantity_unit)) : '') + '</div>';
         if (o.min_qty === 1 && !offerHasDiscount(o)) {
-          html += '<div class="cod-page-offer__tag">' + ((_isGreek) ? '\u039a\u03b1\u03bd\u03bf\u03bd\u03b9\u03ba\u03ae \u03c4\u03b9\u03bc\u03ae' : 'Pre\u021b \u00eentreg') + '</div>';
+          html += '<div class="cod-page-offer__tag">' + L.regular_price + '</div>';
         } else if (o.min_qty > 1) {
-          html += '<div class="cod-page-offer__total">' + formatMoney(perUnit * o.min_qty) + ((_isGreek) ? ' σύνολο' : ' total') + '</div>';
+          html += '<div class="cod-page-offer__total">' + formatMoney(perUnit * o.min_qty) + ' total' + '</div>';
         }
         html += '</div>';
       }
@@ -731,7 +731,7 @@
       if (bdg) {
         html += '<div class="cod-form-offers__badge" style="background:' + tBg + '">' + bdg + '</div>';
       } else if (o.min_qty === 1 && !offerHasDiscount(o)) {
-        html += '<div class="cod-form-offers__fulltag">' + ((_isGreek) ? '\u039a\u03b1\u03bd\u03bf\u03bd\u03b9\u03ba\u03ae \u03c4\u03b9\u03bc\u03ae' : 'Pre\u021b \u00eentreg') + '</div>';
+        html += '<div class="cod-form-offers__fulltag">' + L.regular_price + '</div>';
       }
 
       html += '<div class="cod-form-offers__price">' + formatMoney(pu) + (o.min_qty > 1 ? (('/' + L.quantity_unit)) : '') + '</div>';
@@ -950,7 +950,7 @@ function renderBumps() {
       + '<p class="cod-downsell__message" style="color:' + (dc.message_color || '#333') + '">' + dc.message + '</p>'
       + '<div class="cod-downsell__code" style="background:' + (dc.badge_bg_color || '#C62828') + ';color:' + (dc.badge_text_color || '#fff') + '">' + dc.discount_code + '</div>'
       + '<button type="button" class="cod-downsell__btn" id="cod-downsell-apply" style="background:' + (dc.button_bg_color || '#C62828') + ';color:' + (dc.button_text_color || '#fff') + '">'
-      + (dc.button_text || ((_isGreek) ? 'Εφαρμογή έκπτωσης' : 'Aplică reducerea')) + '</button>'
+      + (dc.button_text || L.downsell_apply) + '</button>'
       + '</div>';
     document.body.appendChild(popup);
 
@@ -998,7 +998,7 @@ function renderBumps() {
       })
       .catch(function () {
         otpSending = false;
-        callback(false, (_isGreek) ? 'Σφάλμα σύνδεσης.' : 'Eroare de conexiune.');
+        callback(false, L.connection_error);
       });
   }
 
@@ -1013,7 +1013,7 @@ function renderBumps() {
     })
       .then(function (r) { return r.json(); })
       .then(function (data) { callback(data.verified, data.error || ''); })
-      .catch(function () { callback(false, (_isGreek) ? 'Σφάλμα σύνδεσης.' : 'Eroare de conexiune.'); });
+      .catch(function () { callback(false, L.connection_error); });
   }
 
   function showOtpPopup(phone, onVerified) {
@@ -1028,13 +1028,13 @@ function renderBumps() {
       + '<button type="button" class="cod-otp__close" id="cod-otp-close">&times;</button>'
       + '<div class="cod-otp__icon">🔐</div>'
       + '<h3 class="cod-otp__title">' + L.otp_title + '</h3>'
-      + '<p class="cod-otp__desc">' + ((_isGreek) ? 'Στείλαμε κωδικό επαλήθευσης στο WhatsApp στον αριθμό ' : 'Am trimis un cod de verificare pe WhatsApp la numărul ') + phone.slice(0, 4) + '***' + phone.slice(-3) + '</p>'
+      + '<p class="cod-otp__desc">' + L.otp_desc + ' ' + phone.slice(0, 4) + '***' + phone.slice(-3) + '</p>'
       + '<div class="cod-otp__input-row">'
       + '<input type="text" id="cod-otp-input" class="cod-otp__input" maxlength="6" placeholder="______" autocomplete="one-time-code" inputmode="numeric" />'
       + '</div>'
       + '<p class="cod-otp__error" id="cod-otp-error" hidden></p>'
       + '<button type="button" class="cod-otp__verify-btn" id="cod-otp-verify">' + L.otp_verify + '</button>'
-      + '<p class="cod-otp__resend">' + ((_isGreek) ? 'Δεν έλαβες τον κωδικό; ' : 'Nu ai primit codul? ') + '<a href="#" id="cod-otp-resend">' + L.otp_resend + '</a></p>'
+      + '<p class="cod-otp__resend"><a href="#" id="cod-otp-resend">' + L.otp_resend + '</a></p>'
       + '</div>';
     document.body.appendChild(popup);
 
@@ -1064,7 +1064,7 @@ function renderBumps() {
             onVerified();
           } else {
             target.disabled = false;
-            target.textContent = (_isGreek) ? 'Επαλήθευση κωδικού' : 'Verifică codul';
+            target.textContent = L.otp_verify;
             if (errEl) { errEl.hidden = false; errEl.textContent = error; }
           }
         });
@@ -1075,8 +1075,8 @@ function renderBumps() {
         var resendLink = target;
         resendLink.textContent = L.otp_sending;
         sendOtp(phone, function (sent, error) {
-          resendLink.textContent = sent ? ((_isGreek) ? 'Ο κωδικός στάλθηκε ξανά!' : 'Cod retrimis!') : (error || ((_isGreek) ? 'Σφάλμα' : 'Eroare'));
-          setTimeout(function () { resendLink.textContent = (_isGreek) ? 'Επαναποστολή' : 'Retrimite'; }, 3000);
+          resendLink.textContent = sent ? L.otp_resent : (error || L.retry);
+          setTimeout(function () { resendLink.textContent = L.otp_resend; }, 3000);
         });
       }
     });
@@ -1109,7 +1109,7 @@ function renderBumps() {
     btn.type = 'button';
     btn.id = 'cod-prepaid-btn';
     btn.style.cssText = 'width:100%;padding:12px;font-size:0.95rem;font-weight:600;color:#ffffff;background:#1a1a1a;border:none;border-radius:8px;cursor:pointer;transition:all 0.2s;';
-    btn.textContent = pp.button_text || ((_isGreek) ? '💳 Πληρωμή online' : 'Plătește online');
+    btn.textContent = pp.button_text || L.online_payment;
 
     if (pp.discount_label) {
       var badge = document.createElement('span');
@@ -1130,7 +1130,7 @@ function renderBumps() {
         var wrap = input.closest('.cod-form__field, .cod-form__row--half');
         if (wrap && wrap.hidden) continue;
         if (!input.value.trim()) {
-          showFieldError(input.name || '', (_isGreek) ? 'Υποχρεωτικό πεδίο' : 'Câmp obligatoriu');
+          showFieldError(input.name || '', L.required_field);
           valid = false;
         }
       }
@@ -1152,7 +1152,7 @@ function renderBumps() {
       if (city) params.push('checkout[shipping_address][city]=' + encodeURIComponent(city.value));
       if (prov) params.push('checkout[shipping_address][province]=' + encodeURIComponent(prov.value));
       if (addr) params.push('checkout[shipping_address][address1]=' + encodeURIComponent(addr.value));
-      params.push('checkout[shipping_address][country]=' + (_isGreek ? 'Greece' : 'Romania'));
+      params.push('checkout[shipping_address][country]=' + ({el:'Greece',pl:'Poland'}[_lang] || 'Romania'));
 
       window.location.href = cartUrl + (params.length ? '?' + params.join('&') : '');
     });
@@ -1414,7 +1414,7 @@ function renderBumps() {
         html += '<span class="cod-form-trigger__icon">' + _ICON_SVG[bs.icon] + '</span>';
       }
       html += '<span class="cod-form-trigger__text">';
-      html += '<span>' + (bs.text || cfg.form.button_text || ((_isGreek) ? 'Παραγγελία με πληρωμή κατά την παράδοση' : 'Comandă cu plata la livrare')) + '</span>';
+      html += '<span>' + (bs.text || cfg.form.button_text || L.submit) + '</span>';
       if (bs.subtitle) {
         html += '<span class="cod-form-trigger__subtitle">' + bs.subtitle + '</span>';
       }
@@ -1451,7 +1451,7 @@ function renderBumps() {
     // Apply COD fee from settings
     if (cfg.settings) {
       codFee = parseFloat(cfg.settings.cod_fee) || 0;
-      codFeeLabel = cfg.settings.cod_fee_label || ((_isGreek) ? 'Χρέωση αντικαταβολής' : 'Taxă ramburs');
+      codFeeLabel = cfg.settings.cod_fee_label || L.cod_fee;
       updateTotals();
     }
 
@@ -1593,7 +1593,7 @@ function renderBumps() {
       input.name = 'custom_' + f.id;
       var defOpt = document.createElement('option');
       defOpt.value = '';
-      defOpt.textContent = f.placeholder || ((_isGreek) ? '\u0394\u03b9\u03ac\u03bb\u03b5\u03be\u03b5...' : 'Selecteaz\u0103...');
+      defOpt.textContent = f.placeholder || L.select_placeholder;
       input.appendChild(defOpt);
       for (var k = 0; k < f.options.length; k++) {
         var opt = document.createElement('option');
@@ -2049,7 +2049,7 @@ function renderBumps() {
             result.className = 'cod-form__discount-result cod-form__discount-result--success';
             var label = data.discount_type === 'percentage'
               ? ('-' + data.value + '%')
-              : (data.discount_type === 'free_shipping' ? ((_isGreek) ? 'Δωρεάν αποστολή' : 'Transport gratuit') : ('-' + formatMoney(data.value)));
+              : (data.discount_type === 'free_shipping' ? L.free_shipping : ('-' + formatMoney(data.value)));
             result.textContent = '\u2713 ' + data.title + ' (' + label + ')';
           }
         } else {
@@ -2057,7 +2057,7 @@ function renderBumps() {
           discountCode = '';
           if (result) {
             result.className = 'cod-form__discount-result cod-form__discount-result--error';
-            result.textContent = data.error || ((_isGreek) ? 'Μη έγκυρος κωδικός' : 'Cod invalid');
+            result.textContent = data.error || L.discount_invalid;
           }
         }
         updateTotals();
@@ -2067,11 +2067,11 @@ function renderBumps() {
         if (result) {
           result.hidden = false;
           result.className = 'cod-form__discount-result cod-form__discount-result--error';
-          result.textContent = (_isGreek) ? 'Σφάλμα κατά την επαλήθευση' : 'Eroare la verificare';
+          result.textContent = L.discount_check_error;
         }
       })
       .finally(function () {
-        if (applyBtn) { applyBtn.disabled = false; applyBtn.textContent = (_isGreek) ? '\u0395\u03c6\u03b1\u03c1\u03bc\u03bf\u03b3\u03ae' : 'Aplic\u0103'; }
+        if (applyBtn) { applyBtn.disabled = false; applyBtn.textContent = L.apply; }
       });
   }
 
@@ -2290,7 +2290,7 @@ function renderBumps() {
           var errMsg = $('cod-error-msg');
           if (errBox && errMsg) {
             errBox.hidden = false;
-            errMsg.textContent = error || ((_isGreek) ? '\u0394\u03b5\u03bd \u03bc\u03c0\u03bf\u03c1\u03ad\u03c3\u03b1\u03bc\u03b5 \u03bd\u03b1 \u03c3\u03c4\u03b5\u03af\u03bb\u03bf\u03c5\u03bc\u03b5 \u03c4\u03bf\u03bd \u03ba\u03c9\u03b4\u03b9\u03ba\u03cc.' : 'Nu am putut trimite codul de verificare.');
+            errMsg.textContent = error || L.otp_error;
           }
         }
       });
@@ -2333,7 +2333,7 @@ function renderBumps() {
       preContainer.innerHTML = '<div style="text-align:center;padding:3rem 1rem">'
         + '<div class="cod-form__submit-loading" style="display:inline-block;width:32px;height:32px;border-width:3px"></div>'
         + '<p style="margin-top:1rem;color:#555;font-size:15px">'
-        + ((_isGreek) ? '\u0395\u03c0\u03b5\u03be\u03b5\u03c1\u03b3\u03b1\u03c3\u03af\u03b1...' : 'Se \u00eencarc\u0103...')
+        + L.upsell_loading
         + '</p></div>';
       preContainer.hidden = false;
     }
@@ -2373,7 +2373,7 @@ function renderBumps() {
       upsellContainer.innerHTML = '<div style="text-align:center;padding:3rem 1rem">'
         + '<div class="cod-form__submit-loading" style="display:inline-block;width:32px;height:32px;border-width:3px"></div>'
         + '<p style="margin-top:1rem;color:#555;font-size:15px">'
-        + ((_isGreek) ? '\u0394\u03b7\u03bc\u03b9\u03bf\u03c5\u03c1\u03b3\u03af\u03b1 \u03c0\u03b1\u03c1\u03b1\u03b3\u03b3\u03b5\u03bb\u03af\u03b1\u03c2...' : 'Se creeaz\u0103 comanda...')
+        + L.upsell_creating
         + '</p></div>';
       upsellContainer.hidden = false;
     }
@@ -2401,7 +2401,7 @@ function renderBumps() {
               successDiv.children[ri].style.display = '';
             }
             var orderNameEl = $('cod-order-name');
-            if (orderNameEl) orderNameEl.textContent = ((_isGreek) ? '\u03a0\u03b1\u03c1\u03b1\u03b3\u03b3\u03b5\u03bb\u03af\u03b1 ' : 'Comanda ') + data.order_name;
+            if (orderNameEl) orderNameEl.textContent = L.order_prefix + ' ' + data.order_name;
           }
           var successCloseBtn = $('cod-success-close');
           if (successCloseBtn) successCloseBtn.style.display = '';
@@ -2414,11 +2414,11 @@ function renderBumps() {
           codCart.clear();
           updateButtonBadge();
         } else {
-          showOrderError(data.error || ((_isGreek) ? '\u03a0\u03c1\u03bf\u03ad\u03ba\u03c5\u03c8\u03b5 \u03c3\u03c6\u03ac\u03bb\u03bc\u03b1. \u0394\u03bf\u03ba\u03af\u03bc\u03b1\u03c3\u03b5 \u03be\u03b1\u03bd\u03ac.' : 'A ap\u0103rut o eroare. \u00cencearc\u0103 din nou.'));
+          showOrderError(data.error || L.connection_error);
         }
       })
       .catch(function () {
-        showOrderError((_isGreek) ? '\u03a3\u03c6\u03ac\u03bb\u03bc\u03b1 \u03c3\u03cd\u03bd\u03b4\u03b5\u03c3\u03b7\u03c2. \u0394\u03bf\u03ba\u03af\u03bc\u03b1\u03c3\u03b5 \u03be\u03b1\u03bd\u03ac.' : 'Eroare de conexiune. \u00cencearc\u0103 din nou.');
+        showOrderError(L.connection_error);
       });
   }
 
@@ -2429,7 +2429,7 @@ function renderBumps() {
     target.innerHTML = '<div style="text-align:center;padding:2rem">'
       + '<p style="color:#c00;margin-bottom:1rem;font-size:15px">' + msg + '</p>'
       + '<button type="button" id="cod-retry-order" style="padding:0.75rem 1.5rem;background:#b5a1e0;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px">'
-      + ((_isGreek) ? '\u0394\u03bf\u03ba\u03af\u03bc\u03b1\u03c3\u03b5 \u03be\u03b1\u03bd\u03ac' : '\u00cencearc\u0103 din nou')
+      + L.retry
       + '</button></div>';
     var retryBtn = document.getElementById('cod-retry-order');
     if (retryBtn) {
@@ -2467,9 +2467,9 @@ function renderBumps() {
         }
       }
       var timerDur = (offerCfg && offerCfg.timer_duration) || uc.default_timer_duration || 60;
-      var acceptText = (offerCfg && offerCfg.accept_text) || uc.default_accept_text || ((_isGreek) ? '\u0391\u03c0\u03bf\u03b4\u03bf\u03c7\u03ae \u03c0\u03c1\u03bf\u03c3\u03c6\u03bf\u03c1\u03ac\u03c2' : 'Accept\u0103 Oferta');
-      var rejectText = (offerCfg && offerCfg.reject_text) || uc.default_reject_text || ((_isGreek) ? '\u038c\u03c7\u03b9, \u03b5\u03c5\u03c7\u03b1\u03c1\u03b9\u03c3\u03c4\u03ce' : 'Nu, mul\u021bumesc');
-      var headerText = (offerCfg && offerCfg.header_text) || ((_isGreek) ? ('\u0395\u03af\u03b4\u03b5\u03c2 \u03ba\u03b1\u03b9 \u03c4\u03bf ' + p.title + ';') : ('Ai v\u0103zut \u0219i ' + p.title + '?'));
+      var acceptText = (offerCfg && offerCfg.accept_text) || uc.default_accept_text || L.accept_offer;
+      var rejectText = (offerCfg && offerCfg.reject_text) || uc.default_reject_text || L.reject_offer;
+      var headerText = (offerCfg && offerCfg.header_text) || (L.upsell_offer_prefix + ' ' + p.title + '?');
       var subheaderText = (offerCfg && offerCfg.subheader_text) || '';
       var acceptColor = (offerCfg && offerCfg.accept_color) || '';
 
@@ -2481,9 +2481,7 @@ function renderBumps() {
       var cur = p.currency || CURRENCY;
       var regularPrice = parseFloat(p.price);
       var upsellPrice = hasCompare ? (regularPrice - parseFloat(savings)) : regularPrice;
-      var rejectFinalText = (_isGreek)
-        ? '\u038c\u03c7\u03b9 \u03b5\u03c5\u03c7\u03b1\u03c1\u03b9\u03c3\u03c4\u03ce, \u03bf\u03bb\u03bf\u03ba\u03bb\u03ae\u03c1\u03c9\u03c3\u03b5 \u03c4\u03b7\u03bd \u03c0\u03b1\u03c1\u03b1\u03b3\u03b3\u03b5\u03bb\u03af\u03b1'
-        : 'Nu, mul\u021bumesc, finaliza\u021bi comanda';
+      var rejectFinalText = L.upsell_no_thanks;
 
       var html = '<div class="cod-upsell-page">';
 
@@ -2491,14 +2489,14 @@ function renderBumps() {
       if (savingsAmt > 0) {
         html += '<div class="cod-upsell-page__gift">'
           + '\ud83c\udf81 ' + savingsAmt + ' ' + cur
-          + ((_isGreek) ? ' \u0394\u03ce\u03c1\u03bf \u03ad\u03ba\u03c0\u03c4\u03c9\u03c3\u03b7 \u03b3\u03b9\u03b1 \u03b5\u03c3\u03ad\u03bd\u03b1' : ' Reducere Cadou Pentru Tine')
+          + ' ' + L.upsell_gift_discount
           + ' \ud83c\udf81</div>';
       }
 
       // Large countdown timer block
       html += '<div class="cod-upsell-page__timer-block" id="cod-upsell-timer">';
       html += '<div class="cod-upsell-page__timer-label">'
-        + ((_isGreek) ? '\u0397 \u03c0\u03c1\u03bf\u03c3\u03c6\u03bf\u03c1\u03ac \u03b5\u03af\u03bd\u03b1\u03b9 \u03b4\u03b9\u03b1\u03b8\u03ad\u03c3\u03b9\u03bc\u03b7 \u03bc\u03cc\u03bd\u03bf' : 'Ofert\u0103 disponibil\u0103 doar')
+        + L.upsell_available_only
         + '</div>';
       html += '<div class="cod-upsell-page__timer-countdown" id="cod-upsell-countdown">'
         + timerStr + '</div>';
@@ -2587,7 +2585,7 @@ function renderBumps() {
       if (acceptBtn) {
         acceptBtn.addEventListener('click', function () {
           acceptBtn.disabled = true;
-          acceptBtn.textContent = (_isGreek) ? '\u2713 \u03a0\u03c1\u03bf\u03c3\u03c4\u03ad\u03b8\u03b7\u03ba\u03b5' : '\u2713 Ad\u0103ugat';
+          acceptBtn.textContent = L.upsell_added;
           acceptBtn.classList.add('cod-upsells__added');
           clearInterval(timerInterval);
 
@@ -2690,7 +2688,7 @@ function renderBumps() {
     bar.className = 'cod-sticky-bar';
     bar.id = 'cod-sticky-bar';
     bar.innerHTML = '<span class="cod-sticky-bar__price">' + formatMoney(unitPrice) + '</span>'
-      + '<button type="button" class="cod-sticky-bar__btn" id="cod-sticky-open">' + ((_isGreek) ? 'Παράγγειλε τώρα' : 'Comandă acum') + '</button>';
+      + '<button type="button" class="cod-sticky-bar__btn" id="cod-sticky-open">' + L.sticky_cta + '</button>';
     document.body.appendChild(bar);
     document.body.classList.add('cod-sticky-active');
 
@@ -2740,7 +2738,7 @@ function renderBumps() {
       btn.className = 'cod-form-trigger';
       btn.id = 'cod-form-open';
       btn.setAttribute('aria-haspopup', 'dialog');
-      btn.textContent = (_isGreek) ? 'Παράγγειλε τώρα \u2014 Πληρωμή κατά την παράδοση' : 'Comand\u0103 acum \u2014 Plata la livrare';
+      btn.textContent = L.sticky_cta_long;
       anchor.parentNode.insertBefore(btn, anchor.nextSibling);
     }
   }
