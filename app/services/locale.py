@@ -142,8 +142,15 @@ _RO_LABELS: dict[str, str] = {
     "zip": "Cod poștal",
     "email": "Email",
     "announcement": "Transport gratuit pentru comenzi peste 150 lei!",
-    "free_shipping_remaining": "Mai ai nevoie de {amount} pentru livrare GRATUITĂ!",
-    "free_shipping_reached": "Felicitări! Beneficiezi de livrare GRATUITĂ! 🎉",
+    "free_shipping_remaining": "Mai ai nevoie de {amount} pentru livrare GRATUIT\u0102!",
+    "free_shipping_reached": "Felicit\u0103ri! Beneficiezi de livrare GRATUIT\u0102! \U0001f389",
+    "sticky_cta": "Comand\u0103 acum",
+    "sticky_cta_long": "Comand\u0103 acum \u2014 Plata la livrare",
+    "accept_offer": "Accept\u0103 Oferta",
+    "reject_offer": "Nu, mul\u021bumesc",
+    "downsell_apply": "Aplic\u0103 reducerea",
+    "select_placeholder": "Selecteaz\u0103...",
+    "phone_error": "Format: 07XX XXX XXX (10 cifre)",
 }
 
 _EL_LABELS: dict[str, str] = {
@@ -203,6 +210,13 @@ _EL_LABELS: dict[str, str] = {
     "announcement": "Δωρεάν αποστολή για παραγγελίες άνω των 40€!",
     "free_shipping_remaining": "Χρειάζεσαι ακόμα {amount} για ΔΩΡΕΑΝ αποστολή!",
     "free_shipping_reached": "Συγχαρητήρια! Απολαμβάνεις ΔΩΡΕΑΝ αποστολή! 🎉",
+    "sticky_cta": "Παράγγειλε τώρα",
+    "sticky_cta_long": "Παράγγειλε τώρα — Πληρωμή κατά την παράδοση",
+    "accept_offer": "Αποδοχή προσφοράς",
+    "reject_offer": "Όχι, ευχαριστώ",
+    "downsell_apply": "Εφαρμογή έκπτωσης",
+    "select_placeholder": "Διάλεξε...",
+    "phone_error": "Συμπλήρωσε: 69X XXXX XXXX (10 ψηφία)",
 }
 
 _PL_LABELS: dict[str, str] = {
@@ -261,7 +275,14 @@ _PL_LABELS: dict[str, str] = {
     "email": "Email",
     "announcement": "Darmowa dostawa dla zamówień powyżej 200 zł!",
     "free_shipping_remaining": "Potrzebujesz jeszcze {amount} do DARMOWEJ dostawy!",
-    "free_shipping_reached": "Gratulacje! Masz DARMOWĄ dostawę! 🎉",
+    "free_shipping_reached": "Gratulacje! Masz DARMOW\u0104 dostaw\u0119! \U0001f389",
+    "sticky_cta": "Zam\u00f3w teraz",
+    "sticky_cta_long": "Zam\u00f3w teraz \u2014 P\u0142atno\u015b\u0107 przy odbiorze",
+    "accept_offer": "Tak, dodaj do zam\u00f3wienia!",
+    "reject_offer": "Nie, dzi\u0119kuj\u0119",
+    "downsell_apply": "Zastosuj rabat",
+    "select_placeholder": "Wybierz...",
+    "phone_error": "Format: 5XX XXX XXX (9 cyfr)",
 }
 
 # Country code → locale config
