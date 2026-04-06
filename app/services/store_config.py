@@ -88,6 +88,7 @@ class CodFormConfig(BaseModel, frozen=True):
 
 class CodUpsellOffer(BaseModel, frozen=True):
     product_id: int
+    discount_amount: float = 0
     header_text: str = ""
     subheader_text: str = ""
     discount_badge_text: str = ""

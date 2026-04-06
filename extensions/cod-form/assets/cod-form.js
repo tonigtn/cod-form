@@ -1470,11 +1470,16 @@ function renderBumps() {
       updateTotals();
     }
 
-    // Apply accent color as primary CSS variable
-    if (fs && fs.accent_color) {
-      document.documentElement.style.setProperty('--color-primary', fs.accent_color);
-      // Also set the dark variant for hover states
-      document.documentElement.style.setProperty('--color-primary-dark', bs ? bs.bg_color_hover : fs.accent_color);
+    // Apply accent color as primary CSS variable (on overlay for specificity)
+    if (fs && fs.accent_color && overlay) {
+      overlay.style.setProperty('--color-primary', fs.accent_color);
+      overlay.style.setProperty('--color-primary-dark', bs ? bs.bg_color_hover : fs.accent_color);
+    }
+    // Inject custom CSS from config
+    if (cfg.settings && cfg.settings.custom_css) {
+      var styleEl = document.getElementById('cod-custom-css');
+      if (!styleEl) { styleEl = document.createElement('style'); styleEl.id = 'cod-custom-css'; document.head.appendChild(styleEl); }
+      styleEl.textContent = cfg.settings.custom_css;
     }
     // Product image size
     var prodImg = overlay ? overlay.querySelector('.cod-form__product-img') : null;
