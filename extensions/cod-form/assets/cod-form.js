@@ -2106,8 +2106,21 @@ function renderBumps() {
     var primaryVariantId = currentVariantId;
     var primaryQty = quantity;
 
-    if (cartItems.length > 0) {
-      // Multi-product cart mode
+    if (offers.length > 0 && currentProductId) {
+      // Offer mode: current product quantity comes from offer selection, not cart
+      var otherItems = cartItems.filter(function(i) { return i.product_id !== currentProductId; });
+      if (selectedVariants.length > 1) {
+        for (var sv = 0; sv < selectedVariants.length; sv++) allVariantIds.push(selectedVariants[sv]);
+      } else {
+        for (var oq = 0; oq < quantity; oq++) allVariantIds.push(currentVariantId);
+      }
+      for (var oi = 0; oi < otherItems.length; oi++) {
+        for (var oiq = 0; oiq < (otherItems[oi].quantity || 1); oiq++) allVariantIds.push(otherItems[oi].variant_id);
+      }
+      primaryVariantId = allVariantIds[0];
+      primaryQty = 1;
+    } else if (cartItems.length > 0) {
+      // Multi-product cart mode (no offers)
       for (var ci = 0; ci < cartItems.length; ci++) {
         for (var cq = 0; cq < (cartItems[ci].quantity || 1); cq++) {
           allVariantIds.push(cartItems[ci].variant_id);
