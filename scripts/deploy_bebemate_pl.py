@@ -15,7 +15,6 @@ import sys
 sys.path.insert(0, ".")
 
 from app.db import pool  # noqa: E402
-from app.services.store_config import save_config_section  # noqa: E402
 
 SHOP = "jcqx7t-0b.myshopify.com"
 
