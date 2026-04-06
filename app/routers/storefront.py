@@ -59,6 +59,7 @@ _LEGACY_STORE_MAP: dict[str, str] = {
     "store_2": "10qaxg-sc.myshopify.com",
     "store_3": "wst6jx-73.myshopify.com",
     "store_4": "jgj1ff-ak.myshopify.com",
+    "store_5": "jcqx7t-0b.myshopify.com",
 }
 
 
