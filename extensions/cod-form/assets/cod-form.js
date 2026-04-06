@@ -17,6 +17,8 @@
   var STORE_ID = SHOP; // alias for backwards compatibility
   var CURRENCY = script.getAttribute('data-currency') || 'RON';
   var _isGreek = CURRENCY === 'EUR' && SHOP.indexOf('jgj1ff') === 0;
+  var _lang = _isGreek ? 'el' : 'ro';
+  var _phonePattern = _isGreek ? /^69\d{8}$/ : /^0\d{9}$/;
   var currentProductId = parseInt(script.getAttribute('data-product-id'), 10) || 0;
   var currentVariantId = parseInt(script.getAttribute('data-variant-id'), 10) || 0;
   var unitPrice = parseFloat(script.getAttribute('data-unit-price')) || 0;
@@ -1278,7 +1280,13 @@ function renderBumps() {
       .then(function (cfg) {
         formConfig = cfg;
         // Update language detection from actual locale config
-        if (cfg.locale && cfg.locale.language) _isGreek = cfg.locale.language === 'el';
+        if (cfg.locale && cfg.locale.language) {
+          _lang = cfg.locale.language;
+          _isGreek = _lang === 'el';
+        }
+        if (cfg.locale && cfg.locale.phone_pattern) {
+          try { _phonePattern = new RegExp(cfg.locale.phone_pattern); } catch (e) { /* keep default */ }
+        }
         // Populate locale labels from form-config response
         if (cfg.locale && cfg.locale.labels) {
           var labels = cfg.locale.labels;
@@ -1665,7 +1673,7 @@ function renderBumps() {
     if (!form) return;
     var phoneEl = form.querySelector('[name="phone"]');
     var phone = phoneEl ? phoneEl.value.replace(/[\s-]/g, '') : '';
-    var partialPhonePattern = (_isGreek) ? /^69\d{8}$/ : /^0\d{9}$/;
+    var partialPhonePattern = _phonePattern;
     if (!phone.match(partialPhonePattern)) return;
 
     _partialSent = true;
@@ -2249,7 +2257,7 @@ function renderBumps() {
       }
     }
     var phoneVal = (form.querySelector('[name="phone"]').value || '').replace(/[\s-]/g, '');
-    var phonePattern = (_isGreek) ? /^69\d{8}$/ : /^0\d{9}$/;
+    var phonePattern = _phonePattern;
     var phoneError = L.phone_error;
     if (phoneVal && !phoneVal.match(phonePattern)) {
       showFieldError('phone', phoneError);

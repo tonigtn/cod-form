@@ -78,6 +78,9 @@ async def create_cod_order(req: CodOrderRequest, shop_id: int) -> CodOrderRespon
     if country == "GR":
         if phone.startswith("69") or phone.startswith("2"):
             phone = "+30" + phone
+    elif country == "PL":
+        if not phone.startswith("+"):
+            phone = "+48" + phone
     elif phone.startswith("0"):
         phone = "+4" + phone
 
@@ -183,12 +186,12 @@ async def create_cod_order(req: CodOrderRequest, shop_id: int) -> CodOrderRespon
             "address1": req.address1,
             "city": req.city,
             "province": req.province,
-            "country": "Greece" if country == "GR" else "Romania",
+            "country": {"GR": "Greece", "PL": "Poland"}.get(country, "Romania"),
             "countryCode": country,
             "zip": req.zip or "",
         },
         "shippingLine": {
-            "title": "Courier" if country == "GR" else "Curier",
+            "title": {"GR": "Courier", "PL": "Kurier"}.get(country, "Curier"),
             "price": req.shipping_price,
         },
         "note": req.note or config.form.custom_note_prefix,
