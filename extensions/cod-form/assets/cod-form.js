@@ -1828,6 +1828,7 @@ function renderBumps() {
     document.body.classList.add('cod-form-open');
     document.documentElement.classList.add('cod-form-open');
     document.addEventListener('touchmove', _preventBgScroll, { passive: false });
+    overlay.scrollTop = 0;
     var formEl = overlay.querySelector('.cod-form');
     if (formEl) formEl.scrollTop = 0;
     var form = $('cod-order-form');
