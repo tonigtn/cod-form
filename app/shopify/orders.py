@@ -81,9 +81,9 @@ async def create_cod_order(req: CodOrderRequest, shop_id: int) -> CodOrderRespon
     elif phone.startswith("0"):
         phone = "+4" + phone
 
-    # Check for quantity discount
-    total_qty = len(req.variant_ids) if req.variant_ids else req.quantity
-    offer = await get_active_offer(shop_id, total_qty, product_id=req.product_id or None)
+    # Check for quantity discount — use req.quantity (offer quantity for current product),
+    # not len(variant_ids) which may include other cart products
+    offer = await get_active_offer(shop_id, req.quantity, product_id=req.product_id or None)
     discount_title = ""
     if offer:
         discount_title = f"Ofertă cantitate ({offer.label})"
@@ -105,19 +105,22 @@ async def create_cod_order(req: CodOrderRequest, shop_id: int) -> CodOrderRespon
     # Build line items
     all_line_items: list[dict[str, object]] = []
     if req.variant_ids:
+        # The first req.quantity entries are the offer product's variants;
+        # the rest are other cart products that should not get the discount.
+        offer_vids = set(req.variant_ids[: req.quantity]) if offer else set()
         variant_counts = Counter(req.variant_ids)
         for vid, count in variant_counts.items():
             li: dict[str, object] = {
                 "variantId": f"gid://shopify/ProductVariant/{vid}",
                 "quantity": count,
             }
-            if offer:
+            if offer and vid in offer_vids:
                 li["appliedDiscount"] = {
                     "title": discount_title,
                     "value": float(offer.discount_percent),
                     "valueType": "PERCENTAGE",
                 }
-            elif auto_discount_amount > 0:
+            elif auto_discount_amount > 0 and vid in offer_vids:
                 li["appliedDiscount"] = {
                     "title": "Reducere automată",
                     "value": auto_discount_amount,

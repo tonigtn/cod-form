@@ -2072,6 +2072,7 @@ function renderBumps() {
     var d = e.detail;
     if (!d || !d.id) return;
     currentVariantId = d.id;
+    selectedVariants[0] = d.id;
     unitPrice = d.price / 100;
     comparePrice = (d.compare_at_price && d.compare_at_price > d.price) ? d.compare_at_price / 100 : 0;
     var variantLabel = $('cod-variant-label');
@@ -2206,10 +2207,11 @@ function renderBumps() {
     // Hide form
     form.hidden = true;
 
-    // Reset submit button for potential retry
+    // Reset submit button + flag for potential retry
     if (submitBtn) submitBtn.disabled = false;
     if (submitText) submitText.hidden = false;
     if (submitLoading) submitLoading.hidden = true;
+    _submitting = false;
 
     // Fetch upsell offers before creating the order
     fetchUpsells();
