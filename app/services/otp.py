@@ -1,20 +1,20 @@
-"""OTP verification for COD orders — in-memory store, WhatsApp delivery."""
+"""OTP verification for COD orders — DB-backed store, WhatsApp delivery."""
 
 from __future__ import annotations
 
+import hashlib
 import os
 import re
 import secrets
-import time
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import httpx
 import structlog
 
-log = structlog.get_logger(__name__)
+from app.db import pool
 
-# In-memory OTP store: key -> (code, expires_at, attempts)
-_otp_store: dict[str, tuple[str, float, int]] = {}
+log = structlog.get_logger(__name__)
 
 _OTP_TTL = 600  # 10 minutes
 _OTP_MAX_ATTEMPTS = 3
@@ -23,9 +23,13 @@ _GRAPH_URL = "https://graph.facebook.com/v21.0"
 _TIMEOUT = 15.0
 
 
-def _phone_key(shop: str, phone: str) -> str:
+def _hash_code(code: str) -> str:
+    return hashlib.sha256(code.encode()).hexdigest()[:32]
+
+
+def _hash_phone(phone: str) -> str:
     cleaned = re.sub(r"[\s\-().]+", "", phone)
-    return f"{shop}:{cleaned}"
+    return hashlib.sha256(cleaned.encode()).hexdigest()[:16]
 
 
 def _normalize_phone(phone: str, country_code: str = "RO") -> str:
@@ -39,6 +43,12 @@ def _normalize_phone(phone: str, country_code: str = "RO") -> str:
         if re.match(r"^69\d{8}$", cleaned):
             return "+30" + cleaned
         return ""
+    if country_code == "PL":
+        if cleaned.startswith("+48"):
+            return cleaned
+        if not cleaned.startswith("+"):
+            return "+48" + cleaned
+        return cleaned
     # Romanian default
     if cleaned.startswith("+40"):
         return cleaned
@@ -49,50 +59,69 @@ def _normalize_phone(phone: str, country_code: str = "RO") -> str:
     return ""
 
 
-def _cleanup_expired() -> None:
-    now = time.monotonic()
-    expired = [k for k, v in _otp_store.items() if v[1] < now]
-    for k in expired:
-        del _otp_store[k]
+async def generate_otp(shop_id: int, phone: str) -> str:
+    """Generate and store a 6-digit OTP code in DB."""
+    # Cleanup expired codes
+    await pool.execute("DELETE FROM otp_codes WHERE expires_at < NOW()")
 
-
-def generate_otp(shop: str, phone: str) -> str:
-    """Generate and store a 6-digit OTP code."""
-    _cleanup_expired()
-    key = _phone_key(shop, phone)
+    phone_hash = _hash_phone(phone)
     code = "".join(str(secrets.randbelow(10)) for _ in range(_OTP_LENGTH))
-    expires = time.monotonic() + _OTP_TTL
-    _otp_store[key] = (code, expires, 0)
-    log.info("otp_generated", shop=shop, phone_last4=phone[-4:])
+    code_hash = _hash_code(code)
+    expires = datetime.now(tz=UTC) + timedelta(seconds=_OTP_TTL)
+
+    await pool.execute(
+        """
+        INSERT INTO otp_codes (shop_id, phone_hash, code_hash, expires_at, attempts)
+        VALUES ($1, $2, $3, $4, 0)
+        ON CONFLICT (shop_id, phone_hash) DO UPDATE
+        SET code_hash = $3, expires_at = $4, attempts = 0
+        """,
+        shop_id, phone_hash, code_hash, expires,
+    )
+
+    log.info("otp_generated", shop_id=shop_id, phone_last4=phone[-4:])
     return code
 
 
-def verify_otp(shop: str, phone: str, code: str) -> tuple[bool, str]:
+async def verify_otp(shop_id: int, phone: str, code: str) -> tuple[bool, str]:
     """Verify an OTP code. Returns (success, error_message)."""
-    _cleanup_expired()
-    key = _phone_key(shop, phone)
-    entry = _otp_store.get(key)
+    phone_hash = _hash_phone(phone)
 
-    if not entry:
-        return False, "Codul a expirat. Solicită un cod nou."
+    row = await pool.fetchrow(
+        "SELECT code_hash, expires_at, attempts FROM otp_codes WHERE shop_id = $1 AND phone_hash = $2",
+        shop_id, phone_hash,
+    )
 
-    stored_code, expires, attempts = entry
+    if not row:
+        return False, "Code expired. Request a new one."
 
-    if time.monotonic() > expires:
-        del _otp_store[key]
-        return False, "Codul a expirat. Solicită un cod nou."
+    if datetime.now(tz=UTC) > row["expires_at"]:
+        await pool.execute(
+            "DELETE FROM otp_codes WHERE shop_id = $1 AND phone_hash = $2",
+            shop_id, phone_hash,
+        )
+        return False, "Code expired. Request a new one."
 
-    if attempts >= _OTP_MAX_ATTEMPTS:
-        del _otp_store[key]
-        return False, "Prea multe încercări. Solicită un cod nou."
+    if row["attempts"] >= _OTP_MAX_ATTEMPTS:
+        await pool.execute(
+            "DELETE FROM otp_codes WHERE shop_id = $1 AND phone_hash = $2",
+            shop_id, phone_hash,
+        )
+        return False, "Too many attempts. Request a new one."
 
-    if code != stored_code:
-        _otp_store[key] = (stored_code, expires, attempts + 1)
-        remaining = _OTP_MAX_ATTEMPTS - attempts - 1
-        return False, f"Cod incorect. Mai ai {remaining} încercări."
+    if _hash_code(code) != row["code_hash"]:
+        await pool.execute(
+            "UPDATE otp_codes SET attempts = attempts + 1 WHERE shop_id = $1 AND phone_hash = $2",
+            shop_id, phone_hash,
+        )
+        remaining = _OTP_MAX_ATTEMPTS - row["attempts"] - 1
+        return False, f"Wrong code. {remaining} attempts remaining."
 
-    del _otp_store[key]
-    log.info("otp_verified", shop=shop, phone_last4=phone[-4:])
+    await pool.execute(
+        "DELETE FROM otp_codes WHERE shop_id = $1 AND phone_hash = $2",
+        shop_id, phone_hash,
+    )
+    log.info("otp_verified", shop_id=shop_id, phone_last4=phone[-4:])
     return True, ""
 
 
@@ -110,7 +139,7 @@ async def send_otp_whatsapp(
     if not access_token:
         return False
 
-    country = "GR" if locale == "el" else "RO"
+    country = {"el": "GR", "pl": "PL"}.get(locale, "RO")
     normalized = _normalize_phone(phone, country_code=country)
     if not normalized:
         return False

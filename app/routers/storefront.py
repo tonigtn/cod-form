@@ -299,6 +299,14 @@ async def create_order(req: CodOrderRequest, request: Request) -> CodOrderRespon
     if not shop_id:
         return CodOrderResponse(success=False, error="Invalid store")
 
+    # Check billing plan order limit
+    from app.shopify.billing import check_order_limit
+
+    allowed, limit_msg = await check_order_limit(req.shop)
+    if not allowed:
+        log.warning("cod_plan_limit_reached", shop=req.shop)
+        return CodOrderResponse(success=False, error=limit_msg)
+
     # Validate phone
     phone_error = await _validate_phone(req.phone, req.shop)
     if phone_error:
