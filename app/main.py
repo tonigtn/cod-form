@@ -17,6 +17,7 @@ from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoin
 from app.auth import router as auth_router
 from app.db.pool import close_pool, init_pool
 from app.routers.admin_analytics import router as analytics_router
+from app.routers.admin_billing import router as billing_router
 from app.routers.admin_blacklist import router as blacklist_router
 from app.routers.admin_config import router as config_router
 from app.routers.admin_orders import router as orders_router
@@ -60,6 +61,7 @@ app.include_router(storefront_router)
 app.include_router(config_router)
 app.include_router(orders_router)
 app.include_router(analytics_router)
+app.include_router(billing_router)
 app.include_router(blacklist_router)
 app.include_router(products_router)
 
