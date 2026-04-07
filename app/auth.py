@@ -151,7 +151,51 @@ async def callback(
     await store_token(shop, access_token)
     log.info("oauth_install_complete", shop=shop, scope=data.get("scope", ""))
 
+    # Auto-populate shop metadata from Shopify API
+    try:
+        await _auto_setup_shop(shop, access_token)
+    except Exception as exc:
+        log.warning("oauth_auto_setup_failed", shop=shop, error=str(exc))
+
     return RedirectResponse(url=f"https://{shop}/admin/apps")
+
+
+# Locale mapping: Shopify primary_locale → our country_code
+_LOCALE_TO_COUNTRY: dict[str, str] = {
+    "ro": "RO", "el": "GR", "pl": "PL", "tr": "TR", "ar": "AR",
+    "pt-BR": "BR", "pt": "PT", "es": "ES", "hi": "IN", "th": "TH",
+    "id": "ID", "vi": "VN", "bg": "BG", "hr": "HR", "hu": "HU",
+    "cs": "CZ", "sk": "SK", "en": "US", "de": "DE", "fr": "FR",
+    "it": "IT", "nl": "NL", "ja": "JP", "ko": "KR", "zh": "CN",
+}
+
+
+async def _auto_setup_shop(shop: str, token: str) -> None:
+    """Fetch shop info from Shopify and auto-populate locale, currency, country."""
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        resp = await client.get(
+            f"https://{shop}/admin/api/2025-01/shop.json",
+            headers={"X-Shopify-Access-Token": token},
+        )
+        resp.raise_for_status()
+        shop_data = resp.json().get("shop", {})
+
+    primary_locale = shop_data.get("primary_locale", "en")
+    currency = shop_data.get("currency", "USD")
+    country_code = shop_data.get("country_code", "")
+    store_name = shop_data.get("name", "")
+
+    # Map locale to our country code if not already set
+    if not country_code:
+        country_code = _LOCALE_TO_COUNTRY.get(primary_locale, "US")
+
+    # Determine locale code
+    locale_code = primary_locale.split("-")[0] if primary_locale else "en"
+
+    from app.shopify.tokens import update_shop_info
+
+    await update_shop_info(shop, locale=locale_code, country_code=country_code, currency=currency, store_name=store_name)
+    log.info("oauth_auto_setup_complete", shop=shop, locale=locale_code, country=country_code, currency=currency)
 
 
 @router.get("/auth/error")
