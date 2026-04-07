@@ -21,6 +21,7 @@ from app.routers.admin_blacklist import router as blacklist_router
 from app.routers.admin_config import router as config_router
 from app.routers.admin_orders import router as orders_router
 from app.routers.admin_products import router as products_router
+from app.routers.proxy import router as proxy_router
 from app.routers.storefront import router as storefront_router
 from app.session import router as session_router
 
@@ -54,6 +55,7 @@ app = FastAPI(
 
 app.include_router(auth_router)
 app.include_router(session_router)
+app.include_router(proxy_router)
 app.include_router(storefront_router)
 app.include_router(config_router)
 app.include_router(orders_router)
@@ -81,7 +83,7 @@ app.add_middleware(ShopifyEmbedMiddleware)
 # CORS — allow all Shopify origins (any myshopify.com store)
 app.add_middleware(
     CORSMiddleware,
-    allow_origin_regex=r"https://.*\.myshopify\.com|https://admin\.shopify\.com|https://.*",
+    allow_origin_regex=r"https://.*\.myshopify\.com|https://admin\.shopify\.com|https://codform\.app|https://.*\.codform\.app",
     allow_methods=["POST", "GET", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["Content-Type", "X-COD-Key", "Authorization"],
     allow_credentials=False,

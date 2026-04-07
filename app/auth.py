@@ -19,14 +19,32 @@ from app.config import (
     get_client_id,
     get_client_secret,
 )
+from app.db import pool
 from app.shopify.tokens import store_token
 
 log = structlog.get_logger(__name__)
 
 router = APIRouter(tags=["auth"])
 
-# In-memory nonce store for OAuth CSRF protection {nonce: (shop, client_id)}
-_nonces: dict[str, tuple[str, str]] = {}
+
+async def _store_nonce(nonce: str, shop: str, client_id: str) -> None:
+    """Store OAuth nonce in DB (persistent across restarts)."""
+    await pool.execute(
+        "INSERT INTO nonces (nonce, shop, client_id) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING",
+        nonce, shop, client_id,
+    )
+    # Cleanup expired nonces (> 10 minutes old)
+    await pool.execute("DELETE FROM nonces WHERE created_at < NOW() - INTERVAL '10 minutes'")
+
+
+async def _pop_nonce(nonce: str) -> tuple[str, str] | None:
+    """Retrieve and delete a nonce. Returns (shop, client_id) or None."""
+    row = await pool.fetchrow(
+        "DELETE FROM nonces WHERE nonce = $1 RETURNING shop, client_id", nonce
+    )
+    if not row:
+        return None
+    return row["shop"], row["client_id"]
 
 
 def _get_client_id_for_shop(shop: str) -> str:
@@ -68,7 +86,7 @@ async def install(shop: str = Query(description="myshopify.com domain")) -> Redi
         return RedirectResponse(url="/auth/error?msg=App+not+configured")
 
     nonce = secrets.token_urlsafe(32)
-    _nonces[nonce] = (shop, client_id)
+    await _store_nonce(nonce, shop, client_id)
 
     redirect_uri = f"{get_app_base_url()}/auth/callback"
     params = urlencode(
@@ -94,7 +112,7 @@ async def callback(
     state: str = Query(description="Nonce for CSRF"),
 ) -> RedirectResponse:
     """Step 2: Exchange authorization code for permanent access token."""
-    nonce_data = _nonces.pop(state, None)
+    nonce_data = await _pop_nonce(state)
     if not nonce_data:
         log.warning("oauth_invalid_nonce", shop=shop, state=state)
         return RedirectResponse(url="/auth/error?msg=Invalid+state")
@@ -175,6 +193,6 @@ def verify_proxy_hmac(query_params: dict[str, str], secret: str) -> bool:
         return False
 
     pairs = sorted(f"{k}={v}" for k, v in query_params.items() if k != "signature")
-    message = "&".join(pairs)
+    message = "".join(pairs)
     computed = hmac.new(secret.encode(), message.encode(), hashlib.sha256).hexdigest()
     return hmac.compare_digest(computed, signature)
