@@ -10,7 +10,7 @@ import { Dashboard } from "./pages/Dashboard";
 import { Config } from "./pages/Config";
 import { Orders } from "./pages/Orders";
 import { Blacklists } from "./pages/Blacklists";
-import { Settings } from "./pages/Settings";
+// Settings page removed — all config is in Config.tsx
 
 /** Get the shop domain — persisted from initial Shopify load. */
 function getShop(): string {
@@ -106,8 +106,8 @@ function AppContent() {
             <Route path="admin/orders" element={<Orders />} />
             <Route path="blacklists" element={<Blacklists />} />
             <Route path="admin/blacklists" element={<Blacklists />} />
-            <Route path="settings" element={<Settings />} />
-            <Route path="admin/settings" element={<Settings />} />
+            <Route path="settings" element={<Config />} />
+            <Route path="admin/settings" element={<Config />} />
             <Route path="*" element={<Dashboard />} />
           </Routes>
         </StoreProvider>

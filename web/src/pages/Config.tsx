@@ -85,7 +85,14 @@ export function Config() {
         {updateSection.isSuccess && (
           <Layout.Section>
             <Banner tone="success" onDismiss={() => updateSection.reset()}>
-              Config saved.
+              Config saved successfully.
+            </Banner>
+          </Layout.Section>
+        )}
+        {updateSection.isError && (
+          <Layout.Section>
+            <Banner tone="critical" onDismiss={() => updateSection.reset()}>
+              Failed to save config. Please try again.
             </Banner>
           </Layout.Section>
         )}
