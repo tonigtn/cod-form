@@ -1,14 +1,14 @@
-# Shopify app configuration — COD Form APP (public)
-name = "COD Form APP"
-client_id = "9546e68cf31321c1da2582135c8db67c"
-application_url = "https://api.codform.app"
+# Shopify app configuration — PrietenBebe (existing stores)
+name = "COD Form PrietenBebe"
+client_id = "ec0069995fdd9483ddbcfa7c8cf8f563"
+application_url = "https://api.magazinultarii.ro"
 embedded = true
 
 [access_scopes]
 scopes = "read_products,write_products,read_orders,write_orders,write_draft_orders,read_customers,write_customers,read_inventory,read_shipping,read_discounts,write_discounts,read_themes,write_themes,read_content,read_locales,read_markets"
 
 [auth]
-redirect_urls = ["https://api.codform.app/auth/callback"]
+redirect_urls = ["https://api.magazinultarii.ro/auth/callback"]
 
 [webhooks]
 api_version = "2025-01"

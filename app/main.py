@@ -85,7 +85,7 @@ app.add_middleware(ShopifyEmbedMiddleware)
 # CORS — allow all Shopify origins (any myshopify.com store)
 app.add_middleware(
     CORSMiddleware,
-    allow_origin_regex=r"https://.*\.myshopify\.com|https://admin\.shopify\.com|https://codform\.app|https://.*\.codform\.app",
+    allow_origin_regex=r"https://.*",
     allow_methods=["POST", "GET", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["Content-Type", "X-COD-Key", "Authorization"],
     allow_credentials=False,
