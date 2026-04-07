@@ -1,0 +1,13 @@
+export { ProductSelector } from "./ProductSelector";
+export { FormTab } from "./FormTab";
+export { ButtonStyleTab } from "./ButtonStyleTab";
+export { ShippingTab } from "./ShippingTab";
+export { FraudTab } from "./FraudTab";
+export { PixelsTab } from "./PixelsTab";
+export { UpsellsTab } from "./UpsellsTab";
+export { BumpsTab } from "./BumpsTab";
+export { DownsellTab } from "./DownsellTab";
+export { PrepaidTab } from "./PrepaidTab";
+export { SettingsTab } from "./SettingsTab";
+export { OffersTab } from "./OffersTab";
+export type { TabProps } from "./types";
