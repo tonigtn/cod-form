@@ -325,6 +325,8 @@ async def create_order(req: CodOrderRequest, request: Request) -> CodOrderRespon
     mutable_fields = dict(req.custom_fields) if req.custom_fields else {}
     mutable_fields["_trk_ip"] = real_ip
     mutable_fields["_trk_ua"] = request.headers.get("user-agent", "")
+    if mutable_fields.get("_ft_url"):
+        mutable_fields["_trk_url"] = mutable_fields["_ft_url"]
     req = req.model_copy(update={"custom_fields": mutable_fields})
 
     log.info("cod_order_request", shop=req.shop, variant_id=req.variant_id, ip=client_ip)

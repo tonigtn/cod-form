@@ -2233,6 +2233,27 @@ function renderBumps() {
       }
     }
 
+    // Collect FirstTrack tracking fields (injected by ft.js as hidden inputs)
+    var ftInputs = form.querySelectorAll('input[name^="_ft_"]');
+    for (var fi = 0; fi < ftInputs.length; fi++) {
+      if (ftInputs[fi].value) payload.custom_fields[ftInputs[fi].name] = ftInputs[fi].value;
+    }
+    // Fallback: read from window.__trk if ft.js populated it
+    if (typeof window !== 'undefined' && window.__trk) {
+      var trkMap = { _ft_vid:'vid', _ft_fbc:'fbc', _ft_fbp:'fbp', _ft_ttc:'ttclid',
+        _ft_gclid:'gclid', _ft_gbraid:'gbraid', _ft_wbraid:'wbraid', _ft_epik:'epik',
+        _ft_sccid:'sccid', _ft_twclid:'twclid', _ft_fp:'fingerprint', _ft_ua:'ua', _ft_url:'url' };
+      for (var tk in trkMap) {
+        if (!payload.custom_fields[tk] && window.__trk[trkMap[tk]]) {
+          payload.custom_fields[tk] = String(window.__trk[trkMap[tk]]);
+        }
+      }
+    }
+    // Capture page URL if not already set
+    if (!payload.custom_fields._ft_url) {
+      try { payload.custom_fields._ft_url = window.location.href; } catch(e) {}
+    }
+
     // Store payload — order creation deferred until after upsell decision
     pendingPayload = payload;
     pendingUpsellValue = 0;

@@ -177,6 +177,30 @@ async def create_cod_order(req: CodOrderRequest, shop_id: int) -> CodOrderRespon
                     }
             all_line_items.append(upsell_li)
 
+    # Build FirstTrack tracking note (ft:{JSON} format)
+    note = req.note or config.form.custom_note_prefix
+    if req.custom_fields:
+        _ft_map = {
+            "_ft_vid": "v", "_ft_fbc": "fc", "_ft_fbp": "fp", "_ft_ttc": "tt",
+            "_ft_gclid": "gc", "_ft_gbraid": "gb", "_ft_wbraid": "wb",
+            "_ft_epik": "ep", "_ft_sccid": "sc", "_ft_twclid": "tw",
+            "_ft_fp": "fg", "_ft_ua": "ua", "_ft_url": "u",
+        }
+        ft_data: dict[str, str] = {}
+        for form_key, json_key in _ft_map.items():
+            val = req.custom_fields.get(form_key, "")
+            if val:
+                ft_data[json_key] = val
+        # Add customer IP to tracking blob
+        ip_val = req.custom_fields.get("_trk_ip", "")
+        if ip_val:
+            ft_data["ip"] = ip_val
+        if ft_data:
+            import json as _json
+
+            ft_json = _json.dumps(ft_data, separators=(",", ":"))
+            note = f"{note}\nft:{ft_json}" if note else f"ft:{ft_json}"
+
     draft_input: dict[str, object] = {
         "lineItems": all_line_items,
         "shippingAddress": {
@@ -194,7 +218,7 @@ async def create_cod_order(req: CodOrderRequest, shop_id: int) -> CodOrderRespon
             "title": {"GR": "Courier", "PL": "Kurier"}.get(country, "Curier"),
             "price": req.shipping_price,
         },
-        "note": req.note or config.form.custom_note_prefix,
+        "note": note,
         "tags": list(config.form.tags),
         "phone": phone,
     }
