@@ -93,7 +93,7 @@ async def create_cod_order(req: CodOrderRequest, shop_id: int) -> CodOrderRespon
         log.info(
             "cod_quantity_discount_applied",
             shop=req.shop,
-            quantity=total_qty,
+            quantity=req.quantity,
             discount_pct=offer.discount_percent,
         )
 
