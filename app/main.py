@@ -140,6 +140,9 @@ if _WEB_DIST.is_dir():
 @app.exception_handler(RequestValidationError)
 async def validation_error_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
     """Return friendly validation errors."""
+    # Log actual validation errors for debugging
+    log.error("validation_error", errors=exc.errors(), body=getattr(exc, "body", None))
+
     # Detect language from request body
     error = "Date invalide. Verifică câmpurile."
     try:
