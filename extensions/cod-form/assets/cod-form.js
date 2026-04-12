@@ -2106,6 +2106,12 @@ function renderBumps() {
     if (!d || !d.id) return;
     currentVariantId = d.id;
     selectedVariants[0] = d.id;
+    // Update all selectedVariants entries that still point to the old variant
+    for (var svi = 1; svi < selectedVariants.length; svi++) {
+      if (!selectedVariants[svi] || selectedVariants[svi] === 0 || isNaN(selectedVariants[svi])) {
+        selectedVariants[svi] = d.id;
+      }
+    }
     unitPrice = d.price / 100;
     comparePrice = (d.compare_at_price && d.compare_at_price > d.price) ? d.compare_at_price / 100 : 0;
     var variantLabel = $('cod-variant-label');
@@ -2114,6 +2120,8 @@ function renderBumps() {
     if (unitPriceEl) unitPriceEl.textContent = formatMoney(unitPrice);
     updateComparePrice();
     updateTotals();
+    renderFormOffers();
+    renderPageOffers();
   });
 
   /* ── Form submit ── */
