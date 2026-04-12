@@ -2003,8 +2003,8 @@ function renderBumps() {
         } else if (!target.checked && idx !== -1) {
           acceptedBumpIds.splice(idx, 1);
         }
-        fetchShippingRates();
         updateTotals();
+        fetchShippingRates();
       }
       return;
     }
