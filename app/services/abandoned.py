@@ -75,12 +75,12 @@ async def mark_recovered(shop_id: int, phone: str) -> str:
 
 async def get_abandoned_stats(shop_id: int) -> dict[str, int]:
     """Get abandoned form stats for a shop."""
-    today = datetime.now(tz=UTC).strftime("%Y-%m-%d")
+    today = datetime.now(tz=UTC).date()
     row = await pool.fetchrow(
         """
         SELECT
             COUNT(*) as total,
-            COUNT(*) FILTER (WHERE created_at::date = $2::date) as today,
+            COUNT(*) FILTER (WHERE created_at::date = $2) as today,
             COUNT(*) FILTER (WHERE recovered = TRUE) as recovered,
             COUNT(*) FILTER (WHERE reminder_sent = TRUE) as reminder_sent
         FROM abandoned_forms WHERE shop_id = $1
