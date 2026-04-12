@@ -103,7 +103,10 @@ async def create_cod_order(req: CodOrderRequest, shop_id: int) -> CodOrderRespon
         for ad in config.auto_discounts.discounts:
             if ad.product_id == req.product_id:
                 auto_discount_amount = ad.discount_amount
+                log.info("cod_auto_discount_matched", shop=req.shop, product_id=req.product_id, amount=auto_discount_amount)
                 break
+        if not auto_discount_amount:
+            log.info("cod_auto_discount_no_match", shop=req.shop, product_id=req.product_id, configured_ids=[ad.product_id for ad in config.auto_discounts.discounts])
 
     # Build line items
     all_line_items: list[dict[str, object]] = []

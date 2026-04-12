@@ -311,9 +311,11 @@ async def load_store_config(shop_id: int) -> CodStoreConfig:
     merged: dict[str, Any] = {}
     for row in rows:
         val = row["config"]
-        if isinstance(val, str):
-            import json
-
+        # Unwrap double/triple-encoded JSON strings
+        import json
+        for _ in range(3):
+            if not isinstance(val, str):
+                break
             with contextlib.suppress(json.JSONDecodeError, TypeError):
                 val = json.loads(val)
         merged[row["section"]] = val
