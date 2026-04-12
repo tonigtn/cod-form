@@ -189,8 +189,8 @@
         productVariants.push({
           id: _parsed[_vi].id,
           title: _parsed[_vi].t,
-          price: _parsed[_vi].p,
-          compare_at_price: _parsed[_vi].cp || 0,
+          price: parseFloat(_parsed[_vi].p) || 0,
+          compare_at_price: parseFloat(_parsed[_vi].cp) || 0,
           image_url: _parsed[_vi].img || '',
           available: _parsed[_vi].ok !== false
         });
