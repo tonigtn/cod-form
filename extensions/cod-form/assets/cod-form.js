@@ -2160,7 +2160,7 @@ function renderBumps() {
         for (var oiq = 0; oiq < (otherItems[oi].quantity || 1); oiq++) allVariantIds.push(otherItems[oi].variant_id);
       }
       primaryVariantId = allVariantIds[0];
-      primaryQty = 1;
+      primaryQty = quantity; // Keep offer quantity so backend can look up the discount
     } else if (cartItems.length > 0) {
       // Multi-product cart mode (no offers)
       for (var ci = 0; ci < cartItems.length; ci++) {
