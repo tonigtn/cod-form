@@ -1693,7 +1693,7 @@ function renderBumps() {
     var form = $('cod-order-form');
     if (!form) return;
     var phoneEl = form.querySelector('[name="phone"]');
-    var phone = phoneEl ? phoneEl.value.replace(/[\s-]/g, '') : '';
+    var phone = phoneEl ? phoneEl.value.replace(/[^0-9+]/g, '') : '';
     var partialPhonePattern = _phonePattern;
     if (!phone.match(partialPhonePattern)) return;
 
@@ -2136,7 +2136,7 @@ function renderBumps() {
     var errorBox2 = $('cod-error-box');
     if (errorBox2) errorBox2.hidden = true;
 
-    var phone = form.querySelector('[name="phone"]').value.replace(/[\s-]/g, '');
+    var phone = form.querySelector('[name="phone"]').value.replace(/[^0-9+]/g, '');
     var getVal = function (name) {
       var el = form.querySelector('[name="' + name + '"]');
       return el ? (el.value || '').trim() : '';
@@ -2307,7 +2307,7 @@ function renderBumps() {
         valid = false;
       }
     }
-    var phoneVal = (form.querySelector('[name="phone"]').value || '').replace(/[\s-]/g, '');
+    var phoneVal = (form.querySelector('[name="phone"]').value || '').replace(/[^0-9+]/g, '');
     var phonePattern = _phonePattern;
     var phoneError = L.phone_error;
     if (phoneVal && !phoneVal.match(phonePattern)) {
@@ -2324,7 +2324,7 @@ function renderBumps() {
     }
 
     // OTP flow: if enabled and not yet verified for this phone, send OTP first
-    var phone = form.querySelector('[name="phone"]').value.replace(/[\s-]/g, '');
+    var phone = form.querySelector('[name="phone"]').value.replace(/[^0-9+]/g, '');
     if (otpEnabled && !otpVerified) {
       var submitBtn = $('cod-submit-btn');
       if (submitBtn) submitBtn.disabled = true;
